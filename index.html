@@ -50,6 +50,22 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .rb{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:10px;font-weight:700}
 .r1{background:var(--gold);color:#000}.r2{background:var(--silver);color:#000}.r3{background:var(--bronze);color:#fff}.ro{background:var(--border);color:var(--muted)}
 .mgr{font-weight:600}.tn{color:var(--muted);font-size:11px}.wins{color:var(--green);font-weight:600}.losses{color:var(--red)}.pf{font-variant-numeric:tabular-nums}
+.mgr-clickable{cursor:pointer;border-bottom:1px dashed transparent;transition:border-color .15s}
+.mgr-clickable:hover{border-bottom-color:currentColor}
+.stat-best{position:relative;font-weight:800!important}
+.stat-best::after{content:'★';font-size:9px;color:var(--gold);margin-left:3px;vertical-align:top}
+/* Manager profile page */
+.mgr-hero{display:flex;align-items:center;gap:16px;margin-bottom:24px;padding:20px 24px;background:var(--surface);border:1px solid var(--border);border-radius:12px}
+.mgr-hero-name{font-family:'Bebas Neue',sans-serif;font-size:42px;line-height:1}
+.mgr-hero-teams{color:var(--muted);font-size:12px;margin-top:4px}
+.mgr-chip-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px}
+.mgr-chip{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 16px;text-align:center;min-width:90px}
+.mgr-chip .mc-val{font-family:'Bebas Neue',sans-serif;font-size:24px;line-height:1;color:var(--green)}
+.mgr-chip .mc-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:3px}
+.mgr-selector{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.mgr-pill{border-radius:20px;padding:6px 16px;font-size:13px;font-weight:700;cursor:pointer;border:2px solid transparent;background:var(--surface);color:var(--muted);transition:all .15s}
+.mgr-pill:hover{color:var(--text)}
+.mgr-pill.active{color:#000}
 /* Year tabs */
 .ytabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
 .ytab{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:5px 12px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .15s}
@@ -170,6 +186,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <a onclick="show('overview')" id="nav-overview" class="active">🏆 Trophy Wall</a>
     <a onclick="show('awards')" id="nav-awards">🥇 Awards</a>
     <a onclick="show('alltime')" id="nav-alltime">📈 All-Time Stats</a>
+    <a onclick="show('managers')" id="nav-managers">👤 Managers</a>
     <div class="nav-lbl">📚 Historik 2018–2025</div>
     <a onclick="show('playoffs')" id="nav-playoffs">🏟️ Playoff Resultater</a>
     <a onclick="show('standings')" id="nav-standings">📊 Regular Season</a>
@@ -213,6 +230,14 @@ tr:hover td{background:rgba(255,255,255,.02)}
   <div class="sec-title">Komplet <span>Manager-statistik</span></div>
   <table><thead><tr><th>Manager</th><th>Sæsoner</th><th>W</th><th>L</th><th>Win%</th><th>PF/sæson</th><th>🏆</th><th>Finaler</th></tr></thead>
   <tbody id="fullstats-body"></tbody></table>
+</div>
+
+<!-- MANAGERS -->
+<div class="section" id="section-managers">
+  <div class="page-title">MANAGERS</div>
+  <div class="page-sub">Individuelle profiler — klik på et navn hvor som helst på siden for at komme direkte hertil</div>
+  <div class="mgr-selector" id="mgr-selector"></div>
+  <div id="mgr-profile-content"></div>
 </div>
 
 <!-- PLAYOFFS -->
@@ -407,7 +432,7 @@ function toggleMobileNav(){
 }
 
 function rb(r){const c=r<=3?'r'+r:'ro';return `<span class="rb ${c}">${r}</span>`;}
-function mgrSpan(m){return `<span class="mgr" style="color:${MGR_COLORS[m]||'var(--text)'}">${m}</span>`;}
+function mgrSpan(m){if(m==='Waivers')return m;return `<span class="mgr mgr-clickable" style="color:${MGR_COLORS[m]||'var(--text)'}" onclick="showManager('${m}')">${m}</span>`;}
 
 // ── COMPUTE ALL-TIME ──
 function computeAT(){
@@ -500,6 +525,28 @@ function renderOverview(){
       <td class="pf">${ppg}</td>
     </tr>`;
   }).join('');
+  highlightBestInTable('alltime-body', [2,3,4,7]);
+}
+
+// ── HIGHLIGHT HELPER ──
+function highlightBestInTable(tbodyId, colIndices, mode='max'){
+  const tbody = document.getElementById(tbodyId);
+  if(!tbody) return;
+  const rows = [...tbody.querySelectorAll('tr')];
+  colIndices.forEach(idx=>{
+    let best = mode==='max' ? -Infinity : Infinity;
+    let bestCells = [];
+    rows.forEach(r=>{
+      const cell = r.children[idx];
+      if(!cell) return;
+      const m = cell.textContent.match(/-?\d+(\.\d+)?/);
+      if(!m) return;
+      const val = parseFloat(m[0]);
+      if(mode==='max' ? val>best : val<best){ best=val; bestCells=[cell]; }
+      else if(val===best){ bestCells.push(cell); }
+    });
+    if(isFinite(best)) bestCells.forEach(c=>c.classList.add('stat-best'));
+  });
 }
 
 // ── AWARDS ──
@@ -597,6 +644,7 @@ function renderAllTime(){
       <td>${s.finals||'—'}</td>
     </tr>`;
   }).join('');
+  highlightBestInTable('fullstats-body', [2,4,5,7]);
 }
 
 // ── PLAYOFFS ──
@@ -646,7 +694,7 @@ function showStAllTime(el){
     const wrB = b[1].wins+b[1].losses>0 ? b[1].wins/(b[1].wins+b[1].losses) : 0;
     return wrB - wrA;
   });
-  let html = `<table><thead><tr><th></th><th>Manager</th><th>Sæsoner</th><th>W</th><th>L</th><th>Win%</th><th>PF total</th><th>PA total</th><th>+/-</th><th>PF/kamp</th></tr></thead><tbody>`;
+  let html = `<table><thead><tr><th></th><th>Manager</th><th>Sæsoner</th><th>W</th><th>L</th><th>Win%</th><th>PF total</th><th>PA total</th><th>+/-</th><th>PF/kamp</th></tr></thead><tbody id="st-alltime-body">`;
   rows.forEach(([m,s],i)=>{
     const wr = s.wins+s.losses>0 ? ((s.wins/(s.wins+s.losses))*100).toFixed(1)+'%' : '—';
     const diff = (s.pf-s.pa).toFixed(0);
@@ -666,8 +714,8 @@ function showStAllTime(el){
     </tr>`;
   });
   html += '</tbody></table>';
-  html += `<p class="note">Sæsoner med ufuldstændige stats (kun top 3 fra tidlige scrapes) tæller stadig med i sæson-antal, men bidrager 0 til W/L/PF hvis data mangler.</p>`;
   document.getElementById('standings-content').innerHTML = html;
+  highlightBestInTable('st-alltime-body', [3,5,6,8,9]);
 }
 function showStY(year,el){
   if(el){document.querySelectorAll('#standings-tabs .ytab').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
@@ -1093,6 +1141,7 @@ function renderDraftGrades(){
       <td style="color:${r.avgAll>0?'var(--green)':'var(--red)'};font-weight:600">${r.avgAll>0?'+':''}${r.avgAll.toFixed(1)}</td>
       <td style="color:${r.avgEarly>0?'var(--green)':'var(--red)'};font-weight:600">${r.avgEarly!==null?(r.avgEarly>0?'+':'')+r.avgEarly.toFixed(1):'—'}</td>
     </tr>`).join('');
+  highlightBestInTable('dg-mgr-body', [3,4]);
 
   // Duds table
   document.getElementById('dg-duds-body').innerHTML = DRAFT_DUDS.map(d=>`
@@ -1233,7 +1282,7 @@ function showTradesYear(year, el){
 }
 
 function renderTradeLog(list){
-  const sorted = [...list].sort((a,b)=> (b.year+b.week).localeCompare(a.year+a.week));
+  const sorted = [...list].sort((a,b)=> (parseInt(b.year)*100+b.week) - (parseInt(a.year)*100+a.week));
   document.getElementById('trades-content').innerHTML = sorted.map(t=>{
     const mgrsLabel = t.managers.map(m=>`<span style="color:${MGR_COLORS[m]||'var(--text)'}">${m}</span>`).join(' ↔ ');
     // Group players by direction using the two managers
@@ -1399,6 +1448,128 @@ async function renderSleeper() {
   }
 }
 
+// ── MANAGERS ──
+function renderManagers(){
+  const managers = Object.keys(MANAGERS_INFO);
+  document.getElementById('mgr-selector').innerHTML = managers.map(m=>
+    `<div class="mgr-pill" id="pill-${m}" style="border-color:${MGR_COLORS[m]||'#888'}" onclick="selectManagerTab('${m}')">${m}</div>`
+  ).join('');
+  const at = computeAT();
+  const sorted = Object.entries(at).sort((a,b)=>b[1].titles-a[1].titles);
+  const defaultMgr = sorted[0]?.[0] || managers[0];
+  selectManagerTab(defaultMgr);
+}
+
+function selectManagerTab(name){
+  document.querySelectorAll('.mgr-pill').forEach(p=>{
+    p.classList.remove('active');
+    p.style.background='var(--surface)';
+    p.style.color='var(--muted)';
+  });
+  const pill = document.getElementById('pill-'+name);
+  if(pill){
+    pill.classList.add('active');
+    pill.style.background = MGR_COLORS[name]||'#888';
+    pill.style.color = '#000';
+  }
+  renderManagerProfile(name);
+}
+
+function showManager(name){
+  show('managers');
+  if(!document.getElementById('pill-'+name)) renderManagers();
+  selectManagerTab(name);
+}
+
+function renderManagerProfile(name){
+  const at = computeAT()[name] || {titles:0,finals:0,podium:0,rsTitles:0,seasons:0,wins:0,losses:0,pf:0,pa:0,bestPF:0};
+  const info = MANAGERS_INFO[name] || {teams:[],active:'?'};
+  const color = MGR_COLORS[name] || 'var(--text)';
+  const wr = at.wins+at.losses>0 ? ((at.wins/(at.wins+at.losses))*100).toFixed(1)+'%' : '—';
+  const ppg = at.wins+at.losses>0 && at.pf>0 ? (at.pf/(at.wins+at.losses)).toFixed(1) : '—';
+
+  const trades = allTrades().filter(t=>t.managers.includes(name) && !t.vetoed);
+  const partnerCounts = {};
+  trades.forEach(t=>{
+    t.managers.filter(m=>m!==name).forEach(p=>{ partnerCounts[p]=(partnerCounts[p]||0)+1; });
+  });
+  const topPartner = Object.entries(partnerCounts).sort((a,b)=>b[1]-a[1])[0];
+
+  const picks = DRAFT_GRADES.filter(p=>p.manager===name);
+  const avgDelta = picks.length ? picks.reduce((s,p)=>s+p.delta,0)/picks.length : null;
+  const bestPick = picks.length ? [...picks].sort((a,b)=>b.delta-a.delta)[0] : null;
+  const worstPick = picks.length ? [...picks].sort((a,b)=>a.delta-b.delta)[0] : null;
+
+  const h2h = computeH2H()[name] || {};
+  const h2hRows = Object.entries(h2h).map(([opp,r])=>({opp, ...r, pct: r.w+r.l>0?r.w/(r.w+r.l):0})).sort((a,b)=>b.pct-a.pct);
+
+  const timeline = Object.keys(RAW).sort().reverse().map(yr=>{
+    const st = RAW[yr].standings.find(s=>s.manager===name);
+    if(!st) return null;
+    const po = PLAYOFFS[yr];
+    const poResult = po?.champion===name?'🏆':po?.finalist===name?'🥈':po?.third===name?'🥉':'';
+    return {yr, ...st, poResult};
+  }).filter(Boolean);
+
+  let html = `
+    <div class="mgr-hero">
+      <div>
+        <div class="mgr-hero-name" style="color:${color}">${name}</div>
+        <div class="mgr-hero-teams">${info.teams.join(', ')} · Aktiv ${info.active}</div>
+      </div>
+    </div>
+    <div class="mgr-chip-row">
+      <div class="mgr-chip"><div class="mc-val" style="color:var(--gold)">${at.titles}</div><div class="mc-lbl">Titler</div></div>
+      <div class="mgr-chip"><div class="mc-val">${at.finals}</div><div class="mc-lbl">Finaler</div></div>
+      <div class="mgr-chip"><div class="mc-val">${at.podium}</div><div class="mc-lbl">Podier</div></div>
+      <div class="mgr-chip"><div class="mc-val">${at.seasons}</div><div class="mc-lbl">Sæsoner</div></div>
+      <div class="mgr-chip"><div class="mc-val">${wr}</div><div class="mc-lbl">Win%</div></div>
+      <div class="mgr-chip"><div class="mc-val">${ppg}</div><div class="mc-lbl">PF/kamp</div></div>
+      <div class="mgr-chip"><div class="mc-val">${trades.length}</div><div class="mc-lbl">Trades</div></div>
+    </div>
+    <div class="sec-title">Sæson <span>Tidslinje</span></div>
+    <table><thead><tr><th></th><th>År</th><th>Hold</th><th>W</th><th>L</th><th>PF</th><th>Playoff</th></tr></thead><tbody>
+    ${timeline.map(t=>`<tr>
+      <td>${rb(t.rank)}</td>
+      <td style="color:var(--muted)">${t.yr}</td>
+      <td class="tn">${t.team}</td>
+      <td class="wins">${t.wins??'—'}</td>
+      <td class="losses">${t.losses??'—'}</td>
+      <td class="pf">${t.pf?t.pf.toFixed(1):'—'}</td>
+      <td style="font-size:16px">${t.poResult}</td>
+    </tr>`).join('')}
+    </tbody></table>
+  `;
+
+  if(picks.length){
+    html += `<div class="sec-title">Draft <span>Performance</span></div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="lbl">Picks analyseret</div><div class="val">${picks.length}</div><div class="sub">Alle runder</div></div>
+      <div class="stat-card"><div class="lbl">Gns. delta</div><div class="val" style="color:${avgDelta>0?'var(--green)':'var(--red)'}">${avgDelta>0?'+':''}${avgDelta.toFixed(1)}</div><div class="sub">Positiv = finder værdi</div></div>
+      <div class="stat-card"><div class="lbl">Bedste pick</div><div class="val" style="font-size:16px;color:var(--green)">${bestPick.player}</div><div class="sub">${bestPick.year} R${bestPick.round} · Δ+${bestPick.delta}</div></div>
+      <div class="stat-card"><div class="lbl">Værste pick</div><div class="val" style="font-size:16px;color:var(--red)">${worstPick.player}</div><div class="sub">${worstPick.year} R${worstPick.round} · Δ${worstPick.delta}</div></div>
+    </div>`;
+  }
+
+  if(trades.length){
+    html += `<div class="sec-title">Trade <span>Aktivitet</span></div>
+    <div class="info-box">${trades.length} gennemførte trades${topPartner?`, oftest med ${mgrSpan(topPartner[0])} (${topPartner[1]}×)`:''}.</div>`;
+  }
+
+  if(h2hRows.length){
+    html += `<div class="sec-title">Head-to-Head <span>Rekord</span></div>
+    <table><thead><tr><th>Modstander</th><th>Record</th><th>Win%</th></tr></thead><tbody>
+    ${h2hRows.map(r=>`<tr>
+      <td>${mgrSpan(r.opp)}</td>
+      <td><span style="color:var(--green)">${r.w}</span>–<span style="color:var(--red)">${r.l}</span></td>
+      <td style="color:${r.pct>0.5?'var(--green)':r.pct<0.5?'var(--red)':'var(--muted)'}">${(r.pct*100).toFixed(0)}%</td>
+    </tr>`).join('')}
+    </tbody></table>`;
+  }
+
+  document.getElementById('mgr-profile-content').innerHTML = html;
+}
+
 // ── BOOT ──
 renderOverview();
 renderAwards();
@@ -1411,6 +1582,7 @@ renderH2H();
 renderAbout();
 renderTrades();
 renderDraftGrades();
+renderManagers();
 
 // Kald Sleeper lazy ved første besøg
 document.getElementById('nav-sleeper').addEventListener('click', () => {
@@ -1422,3 +1594,4 @@ document.getElementById('nav-sleeper').addEventListener('click', () => {
 </script>
 </body>
 </html>
+  
