@@ -29,7 +29,7 @@ nav a.active{color:var(--green);border-left-color:var(--green);background:rgba(2
 .sec-title span{color:var(--green)}
 /* Trophy wall */
 .trophy-wall{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:36px}
-.tc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 10px;text-align:center;transition:all .2s;cursor:default;position:relative}
+.tc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 10px;text-align:center;transition:all .2s;cursor:default;position:relative;min-width:0;overflow:hidden}
 .tc:hover{transform:translateY(-2px);border-color:var(--gold)}
 /* .tc.reg-champ{border-color:rgba(212,168,67,.3)} */
 .tc.shame{border-color:rgba(224,82,82,.25)}
@@ -37,10 +37,10 @@ nav a.active{color:var(--green);border-left-color:var(--green);background:rgba(2
 .tc.shame .yr{color:var(--red)}
 .tc.shame .ti{filter:grayscale(0.3)}
 .tc .yr{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--gold);line-height:1}
-.tc .cn{font-size:13px;font-weight:700;margin:5px 0 2px}
-.tc .ct{font-size:11px;color:var(--muted);line-height:1.3}
+.tc .cn{font-size:13px;font-weight:700;margin:5px 0 2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tc .ct{font-size:11px;color:var(--muted);line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tc .ti{font-size:20px;margin-bottom:4px}
-.tc .reg-tag{font-size:9px;color:var(--muted);margin-top:4px;padding-top:4px;border-top:1px solid var(--border)}
+.tc .reg-tag{font-size:9px;color:var(--muted);margin-top:4px;padding-top:4px;border-top:1px solid var(--border);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* Stat grid */
 .stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px;margin-bottom:32px}
 .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px}
@@ -630,14 +630,31 @@ function applyDismissedBoxes(){
 // ── COLLAPSIBLE GRUPPER (fx statistik-kort) ──
 // ── DYNAMISK KOLONNE-BEREGNING (Trophy Wall / Toilet Bowl) ──
 // Sikrer at trofæ-gitteret aldrig fylder mere end 2 rækker, uanset hvor mange
-// sæsoner der kommer til fremover (2026, 2027, ...). Beregnes ud fra det
-// faktiske antal kort hver gang, i stedet for et hardcodet kolonnetal.
+// sæsoner der kommer til fremover (2026, 2027, ...) — men respekterer altid
+// den faktiske skærmbredde, så intet klippes af på mobil. Bruger window.innerWidth
+// (ikke el.clientWidth), fordi elementet kan være skjult (display:none) når
+// funktionen kaldes for en fane brugeren ikke lige kigger på.
 function setWallColumns(elId, count){
   const el = document.getElementById(elId);
   if(!el) return;
-  const cols = Math.min(Math.max(1, Math.ceil(count/2)), 6); // maks 6 kolonner for læsbarhedens skyld
+  const isMobile = window.innerWidth <= 700;
+  const sidePadding = isMobile ? 32 : 80;
+  const sidebarWidth = isMobile ? 0 : 210;
+  const availableWidth = Math.min(window.innerWidth - sidePadding - sidebarWidth, 1440-80);
+  const minCardWidth = isMobile ? 78 : 100;
+  const gap = isMobile ? 6 : 10;
+  const maxColsByWidth = Math.max(1, Math.floor((availableWidth+gap)/(minCardWidth+gap)));
+  const idealColsFor2Rows = Math.ceil(count/2);
+  const cols = Math.max(1, Math.min(idealColsFor2Rows, maxColsByWidth, 6));
   el.style.gridTemplateColumns = `repeat(${cols},1fr)`;
 }
+window.addEventListener('resize', () => {
+  clearTimeout(window._wallResizeTimer);
+  window._wallResizeTimer = setTimeout(() => {
+    if(typeof PLAYOFFS!=='undefined') setWallColumns('trophy-wall', Object.keys(PLAYOFFS).length);
+    if(typeof TOILETBOWL!=='undefined') setWallColumns('toilet-wall', Object.keys(TOILETBOWL).length);
+  }, 200);
+});
 
 function toggleCollapse(key){
   const body = document.getElementById('collapse-body-'+key);
