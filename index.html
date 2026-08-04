@@ -9,7 +9,8 @@
 <style>
 :root{--bg:#0B0F14;--surface:#141920;--surface2:#1a2130;--border:#1E2733;--border2:#263244;--green:#1DB954;--gold:#D4A843;--silver:#9BA3AF;--bronze:#CD7F32;--text:#E8EDF2;--muted:#6B7A8D;--accent:#2563EB;--red:#E05252;--purple:#8B5CF6}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;min-height:100vh}
+html{overflow-x:hidden;width:100%}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;min-height:100vh;overflow-x:hidden;width:100%}
 .shell{display:flex;min-height:100vh}
 .sidebar{width:210px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);padding:24px 0;position:sticky;top:0;height:100vh;overflow-y:auto}
 .main{flex:1;padding:32px 40px;max-width:1440px}
@@ -20,7 +21,7 @@ nav a{display:block;padding:8px 20px;color:var(--muted);text-decoration:none;fon
 nav a:hover{color:var(--text);background:rgba(255,255,255,.04)}
 nav a.active{color:var(--green);border-left-color:var(--green);background:rgba(29,185,84,.07)}
 .nav-lbl{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);padding:14px 20px 4px;text-transform:uppercase}
-.section{display:none}.section.active{display:block}
+.section{display:none;max-width:100%}.section.active{display:block}
 .page-title{font-family:'Bebas Neue',sans-serif;font-size:46px;letter-spacing:2px;line-height:1;margin-bottom:4px}
 .page-sub{color:var(--muted);font-size:13px;margin-bottom:28px}
 .sec-title{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;margin-bottom:12px;margin-top:32px}
@@ -137,6 +138,25 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .h2h-win{color:var(--green);font-weight:700}.h2h-loss{color:var(--red)}.h2h-self{background:var(--border)}
 /* Info box */
 .info-box{background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.25);border-radius:8px;padding:11px 14px;font-size:12px;color:var(--muted);margin-bottom:18px}
+.dismissible{position:relative;padding-right:36px}
+.dismiss-btn{
+  position:absolute;top:8px;right:8px;background:rgba(255,255,255,.06);
+  border:none;color:var(--muted);width:22px;height:22px;border-radius:50%;
+  cursor:pointer;font-size:12px;line-height:1;display:flex;align-items:center;justify-content:center;
+  transition:all .15s;
+}
+.dismiss-btn:hover{background:var(--red);color:#fff}
+.collapsible-group{margin-bottom:24px}
+.collapse-header{
+  width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;
+  padding:10px 14px;display:flex;justify-content:space-between;align-items:center;
+  cursor:pointer;color:var(--text);font-weight:700;font-size:13px;
+}
+.collapse-header:hover{border-color:var(--muted)}
+.collapse-arrow{transition:transform .2s;color:var(--muted);font-size:11px}
+.collapse-arrow.collapsed{transform:rotate(-90deg)}
+.collapse-body{margin-top:10px}
+.collapse-body.collapsed{display:none}
 .info-box strong{color:var(--text)}
 .warn-box{background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.25);border-radius:8px;padding:11px 14px;font-size:12px;color:var(--muted);margin-bottom:18px}
 .warn-box strong{color:var(--gold)}
@@ -168,14 +188,14 @@ tr:hover td{background:rgba(255,255,255,.02)}
 @media(max-width:700px){
   .shell{flex-direction:column}
   .mobile-topbar{
-    display:flex;align-items:center;justify-content:space-between;
+    display:flex;align-items:center;justify-content:space-between;gap:8px;
     background:var(--surface);border-bottom:1px solid var(--border);
     padding:12px 16px;position:sticky;top:0;z-index:100;
   }
   .mobile-topbar .logo{padding:0;border:none}
   .mobile-menu-btn{
     background:var(--border);border:none;color:var(--text);
-    font-size:20px;padding:6px 12px;border-radius:6px;cursor:pointer;
+    font-size:20px;padding:6px 12px;border-radius:6px;cursor:pointer;flex-shrink:0;
   }
   .sidebar{
     display:none;position:fixed;top:0;left:0;right:0;bottom:0;
@@ -188,16 +208,30 @@ tr:hover td{background:rgba(255,255,255,.02)}
     border-radius:50%;cursor:pointer;
   }
   .main{padding:16px}
+  .main table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .stat-grid{grid-template-columns:repeat(2,1fr)!important;gap:6px!important}
+  .stat-card{padding:8px!important}
+  .stat-card .val{font-size:22px!important}
+  .stat-card .lbl{font-size:9px!important;margin-bottom:3px!important}
+  .stat-card .sub{font-size:10px!important}
+  .tc{padding:10px 6px!important}
+  .tc .yr{font-size:20px!important}
+  .tc .cn{font-size:11px!important;margin:3px 0 1px!important}
+  .tc .ct{font-size:9px!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tc .ti{font-size:15px!important;margin-bottom:2px!important}
+  .podium-grid{grid-template-columns:1fr!important}
+  .awards-grid{grid-template-columns:1fr!important}
+  .draft-grid{grid-template-columns:repeat(2,1fr)!important}
   .scroll-hint{display:flex}
   .mobile-nav-arrow{
     background:var(--border);border:none;color:var(--text);
-    font-size:18px;width:32px;height:32px;border-radius:50%;
+    font-size:20px;width:56px;height:36px;border-radius:6px;
     cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;
   }
   .mobile-nav-arrow:active{background:var(--green);color:#000}
   .mobile-topbar-title{
-    flex:1;text-align:center;font-size:14px;font-weight:700;color:var(--text);
-    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 6px;
+    flex:1;text-align:center;font-size:13px;font-weight:700;color:var(--text);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px;min-width:0;
   }
 }
 </style>
@@ -243,7 +277,15 @@ tr:hover td{background:rgba(255,255,255,.02)}
   <div class="page-title">TROPHY WALL</div>
   <div class="page-sub">Oase NFL Fantasy League · 8 sæsoner · 2018–2025 · Playoff-mesterskaber</div>
   <div class="trophy-wall" id="trophy-wall"></div>
-  <div class="stat-grid" id="overview-stats"></div>
+  <div class="collapsible-group" id="collapse-overviewstats">
+    <div class="collapse-header" onclick="toggleCollapse('overviewstats')">
+      <span>📊 Statistik-overblik</span>
+      <span class="collapse-arrow" id="collapse-arrow-overviewstats">▼</span>
+    </div>
+    <div class="collapse-body" id="collapse-body-overviewstats">
+      <div class="stat-grid" id="overview-stats"></div>
+    </div>
+  </div>
   <div class="sec-title">All-Time <span>Playoff-vindertabel</span></div>
   <table><thead><tr><th></th><th>Manager</th><th>🏆 PO-titler</th><th>🥈 Finaler</th><th>🥉 PO Top 3</th><th>🎖️ RS #1</th><th>Sæsoner</th><th>Win%</th><th>PPG</th></tr></thead>
   <tbody id="alltime-body"></tbody></table>
@@ -280,7 +322,15 @@ tr:hover td{background:rgba(255,255,255,.02)}
   <div class="page-title">🚽 TOILET BOWL</div>
   <div class="page-sub">Ligaens sande bundniveau — kåringen af årets 💩King, år for år</div>
   <div class="trophy-wall" id="toilet-wall"></div>
-  <div class="stat-grid" id="toilet-stats"></div>
+  <div class="collapsible-group" id="collapse-toiletstats">
+    <div class="collapse-header" onclick="toggleCollapse('toiletstats')">
+      <span>📊 Statistik-overblik</span>
+      <span class="collapse-arrow" id="collapse-arrow-toiletstats">▼</span>
+    </div>
+    <div class="collapse-body" id="collapse-body-toiletstats">
+      <div class="stat-grid" id="toilet-stats"></div>
+    </div>
+  </div>
   <div class="sec-title">Toilet Bowl <span>Bracket</span></div>
   <div class="ytabs" id="toilet-tabs"></div>
   <div id="toilet-bracket-content"></div>
@@ -330,7 +380,8 @@ tr:hover td{background:rgba(255,255,255,.02)}
 <div class="section" id="section-draft">
   <div class="page-title">DRAFT HISTORIK</div>
   <div class="page-sub">Alle 15 runder — hvem valgte hvem?</div>
-  <div class="cmc-banner">
+  <div class="cmc-banner dismissible" id="dismiss-cmcbanner">
+    <button class="dismiss-btn" onclick="dismissBox('cmcbanner')">✕</button>
     <div class="cmc-n">4×</div>
     <div class="cmc-t">
       <h3>Christian McCaffrey — ligaens evige #1 overall pick</h3>
@@ -350,7 +401,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
 <div class="section" id="section-draftgrades">
   <div class="page-title">DRAFT GRADES</div>
   <div class="page-sub">Hvem draftede godt? Baseret på faktiske Sleeper-sæsonstats for alle 900 picks</div>
-  <div class="info-box"><strong>Sådan virker det:</strong> Hver picks "forventede" positionsrang beregnes ud fra medianen for alle jeres picks i samme runde og position (internt baseline, ikke ekstern ADP). Delta = forventet rang minus faktisk rang. Positiv delta = spilleren performede bedre end runden tilsagde ("steal"). Negativ = værre ("bust"). 11 spillere der reelt sad hele sæsonen ude pga. skader er udeladt fra steal/bust-beregningen, men vist separat nedenfor.</div>
+  <div class="info-box dismissible" id="dismiss-dgmethod"><button class="dismiss-btn" onclick="dismissBox('dgmethod')">✕</button><strong>Sådan virker det:</strong> Hver picks "forventede" positionsrang beregnes ud fra medianen for alle jeres picks i samme runde og position (internt baseline, ikke ekstern ADP). Delta = forventet rang minus faktisk rang. Positiv delta = spilleren performede bedre end runden tilsagde ("steal"). Negativ = værre ("bust"). 11 spillere der reelt sad hele sæsonen ude pga. skader er udeladt fra steal/bust-beregningen, men vist separat nedenfor.</div>
 
   <div class="stat-grid" id="dg-stats"></div>
 
@@ -427,7 +478,15 @@ tr:hover td{background:rgba(255,255,255,.02)}
 <div class="section" id="section-trades">
   <div class="page-title">TRADES</div>
   <div class="page-sub">Al trade-historik — sæson for sæson og på tværs af tid</div>
-  <div class="stat-grid" id="trades-stats"></div>
+  <div class="collapsible-group" id="collapse-tradestats">
+    <div class="collapse-header" onclick="toggleCollapse('tradestats')">
+      <span>📊 Statistik-overblik</span>
+      <span class="collapse-arrow" id="collapse-arrow-tradestats">▼</span>
+    </div>
+    <div class="collapse-body" id="collapse-body-tradestats">
+      <div class="stat-grid" id="trades-stats"></div>
+    </div>
+  </div>
 
   <div class="sec-title">Trade <span>Machine Award</span></div>
   <div class="awards-grid" id="trades-awards"></div>
@@ -552,6 +611,55 @@ function toggleMobileNav(){
   document.getElementById('sidebar').classList.toggle('open');
 }
 
+// ── DISMISSIBLE INFO-BOKSE ──
+// Husker via localStorage, så en lukket boks forbliver skjult ved fremtidige besøg.
+function dismissBox(key){
+  const el = document.getElementById('dismiss-'+key);
+  if(el) el.style.display = 'none';
+  try{ localStorage.setItem('oase_dismissed_'+key, '1'); }catch(e){ /* localStorage utilgængelig, harmløst */ }
+}
+function applyDismissedBoxes(){
+  document.querySelectorAll('.dismissible[id^="dismiss-"]').forEach(el=>{
+    const key = el.id.replace('dismiss-','');
+    try{
+      if(localStorage.getItem('oase_dismissed_'+key)==='1') el.style.display='none';
+    }catch(e){ /* localStorage utilgængelig, vis boksen som normalt */ }
+  });
+}
+
+// ── COLLAPSIBLE GRUPPER (fx statistik-kort) ──
+// ── DYNAMISK KOLONNE-BEREGNING (Trophy Wall / Toilet Bowl) ──
+// Sikrer at trofæ-gitteret aldrig fylder mere end 2 rækker, uanset hvor mange
+// sæsoner der kommer til fremover (2026, 2027, ...). Beregnes ud fra det
+// faktiske antal kort hver gang, i stedet for et hardcodet kolonnetal.
+function setWallColumns(elId, count){
+  const el = document.getElementById(elId);
+  if(!el) return;
+  const cols = Math.min(Math.max(1, Math.ceil(count/2)), 6); // maks 6 kolonner for læsbarhedens skyld
+  el.style.gridTemplateColumns = `repeat(${cols},1fr)`;
+}
+
+function toggleCollapse(key){
+  const body = document.getElementById('collapse-body-'+key);
+  const arrow = document.getElementById('collapse-arrow-'+key);
+  if(!body) return;
+  const nowCollapsed = body.classList.toggle('collapsed');
+  if(arrow) arrow.classList.toggle('collapsed', nowCollapsed);
+  try{ localStorage.setItem('oase_collapsed_'+key, nowCollapsed ? '1' : '0'); }catch(e){ /* harmløst */ }
+}
+function applyCollapsedGroups(){
+  document.querySelectorAll('.collapse-body').forEach(body=>{
+    const key = body.id.replace('collapse-body-','');
+    try{
+      if(localStorage.getItem('oase_collapsed_'+key)==='1'){
+        body.classList.add('collapsed');
+        const arrow = document.getElementById('collapse-arrow-'+key);
+        if(arrow) arrow.classList.add('collapsed');
+      }
+    }catch(e){ /* localStorage utilgængelig, vis som normalt */ }
+  });
+}
+
 function rb(r){const c=r<=3?'r'+r:'ro';return `<span class="rb ${c}">${r}</span>`;}
 function mgrSpan(m){if(m==='Waivers')return m;return `<span class="mgr mgr-clickable" style="color:${MGR_COLORS[m]||'var(--text)'}" onclick="showManager('${m}')">${m}</span>`;}
 
@@ -613,6 +721,7 @@ function renderOverview(){
       ${diff?`<div class="reg-tag">RS: ${rsChamp}</div>`:''}
     </div>`;
   }).join('');
+  setWallColumns('trophy-wall', years.length);
 
   const at=computeAT();
   const byTitles=Object.entries(at).sort((a,b)=>{
@@ -632,7 +741,7 @@ function renderOverview(){
 
   document.getElementById('overview-stats').innerHTML=`
     <div class="stat-card"><div class="lbl">Sæsoner</div><div class="val">${years.length}</div><div class="sub">2018 → 2025</div></div>
-    <div class="stat-card"><div class="lbl">Mest titler</div><div class="val" style="color:var(--gold)">${byTitles[0][1].titles}×</div><div class="sub">${byTitles[0][0]}</div></div>
+    <div class="stat-card"><div class="lbl">Flest titler</div><div class="val" style="color:var(--gold)">${byTitles[0][1].titles}×</div><div class="sub">${byTitles[0][0]}</div></div>
     <div class="stat-card"><div class="lbl">Flest podier</div><div class="val">${byPodium[0][1].podium}</div><div class="sub">${byPodium[0][0]}</div></div>
     <div class="stat-card"><div class="lbl">Managers</div><div class="val">${Object.keys(at).length}</div><div class="sub">Aktive og tidligere</div></div>
     <div class="stat-card"><div class="lbl">Kampe spillet</div><div class="val" style="font-size:26px">${totalMatchups}</div><div class="sub">Regular season</div></div>
@@ -1848,6 +1957,7 @@ function renderToiletBowl(){
       <div class="ct">${team}</div>
     </div>`;
   }).join('');
+  setWallColumns('toilet-wall', years.length);
 
   const counts = {};
   years.forEach(yr=>{
@@ -2462,6 +2572,8 @@ function renderAll(){
 // ── BOOT ──
 renderAll();
 mergeLiveSeason();
+applyDismissedBoxes();
+applyCollapsedGroups();
 
 // Kald Sleeper lazy ved første besøg
 document.getElementById('nav-sleeper').addEventListener('click', () => {
