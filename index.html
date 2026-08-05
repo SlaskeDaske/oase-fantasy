@@ -185,6 +185,9 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .chart-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:24px}
 .chart-lbl{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px}
 .mobile-topbar{display:none}
+.mobile-bottom-nav{display:none}
+.bottom-sheet-backdrop{display:none}
+.bottom-sheet{display:none}
 @media(max-width:700px){
   .shell{flex-direction:column}
   .mobile-topbar{
@@ -233,6 +236,51 @@ tr:hover td{background:rgba(255,255,255,.02)}
     flex:1;text-align:center;font-size:13px;font-weight:700;color:var(--text);
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px;min-width:0;
   }
+  .mobile-bottom-nav{
+    display:flex;position:fixed;bottom:0;left:0;right:0;z-index:150;
+    background:var(--surface);border-top:1px solid var(--border);
+    padding:8px 8px calc(8px + env(safe-area-inset-bottom));
+    gap:8px;
+  }
+  .bottom-nav-btn{
+    flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
+    background:var(--border);border:none;color:var(--text);
+    border-radius:8px;padding:10px 8px;cursor:pointer;
+    font-size:12px;font-weight:700;min-height:44px;min-width:0;
+  }
+  .bottom-nav-btn:active{background:var(--green);color:#000}
+  .bnb-arrow{font-size:16px;flex-shrink:0}
+  .bnb-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+  .bottom-nav-hamburger{
+    background:var(--green);color:#000;border:none;
+    width:52px;height:44px;border-radius:8px;font-size:20px;
+    cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  }
+  .bottom-sheet-backdrop{
+    display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:160;
+  }
+  .bottom-sheet-backdrop.open{display:block}
+  .bottom-sheet{
+    display:none;position:fixed;left:0;right:0;
+    bottom:calc(60px + env(safe-area-inset-bottom));
+    z-index:170;background:var(--surface);border-top:1px solid var(--border);
+    border-radius:16px 16px 0 0;max-height:55vh;overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    box-shadow:0 -8px 24px rgba(0,0,0,.4);
+  }
+  .bottom-sheet.open{display:block}
+  .bottom-sheet-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:10px auto 6px}
+  .bottom-sheet-list{padding-bottom:12px}
+  .bottom-sheet-list a{
+    display:block;padding:12px 20px;color:var(--text);text-decoration:none;
+    font-size:15px;font-weight:600;border-bottom:1px solid rgba(255,255,255,.04);
+  }
+  .bottom-sheet-list a.active{color:var(--green)}
+  .bottom-sheet-list .bs-lbl{
+    font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);
+    text-transform:uppercase;padding:14px 20px 4px;
+  }
+  .main{padding-bottom:78px!important}
 }
 </style>
 </head>
@@ -541,6 +589,22 @@ tr:hover td{background:rgba(255,255,255,.02)}
 </div>
 
 </main>
+<div class="mobile-bottom-nav" id="mobile-bottom-nav">
+  <button class="bottom-nav-btn" onclick="navigateSection(-1)">
+    <span class="bnb-arrow">‹</span>
+    <span class="bnb-label" id="bottom-nav-prev-label">Ligaen</span>
+  </button>
+  <button class="bottom-nav-hamburger" onclick="toggleBottomSheet()">☰</button>
+  <button class="bottom-nav-btn" onclick="navigateSection(1)">
+    <span class="bnb-label" id="bottom-nav-next-label">Awards</span>
+    <span class="bnb-arrow">›</span>
+  </button>
+</div>
+<div class="bottom-sheet-backdrop" id="bottom-sheet-backdrop" onclick="closeBottomSheet()"></div>
+<div class="bottom-sheet" id="bottom-sheet">
+  <div class="bottom-sheet-handle"></div>
+  <div class="bottom-sheet-list" id="bottom-sheet-list"></div>
+</div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script>
@@ -588,16 +652,64 @@ const NAV_TITLES = {
   matchups:'Matchups', h2h:'Head-to-Head', draft:'Draft', draftgrades:'Draft Grades',
   trades:'Trades', about:'Ligaen'
 };
+const NAV_ICONS = {
+  overview:'🏆', awards:'🥇', alltime:'📈', managers:'👤',
+  sleeper:'🟢', powerrankings:'📈', playoffodds:'🎲',
+  playoffs:'🏟️', toiletbowl:'🚽', standings:'📊',
+  matchups:'⚡', h2h:'⚔️', draft:'📋', draftgrades:'🎯',
+  trades:'🔄', about:'ℹ️'
+};
+const NAV_GROUPS = [
+  {label:'Overblik', items:['overview','awards','alltime','managers']},
+  {label:'💤 Live (Sleeper)', items:['sleeper','powerrankings','playoffodds']},
+  {label:'📚 Historik 2018–2025', items:['playoffs','toiletbowl','standings','matchups','h2h','draft','draftgrades','trades']},
+  {label:'Info', items:['about']}
+];
 
 function show(id){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('nav a').forEach(a=>a.classList.remove('active'));
+  document.querySelectorAll('#bottom-sheet-list a').forEach(a=>a.classList.remove('active'));
   document.getElementById('section-'+id).classList.add('active');
   document.getElementById('nav-'+id).classList.add('active');
+  const bsLink = document.getElementById('bnav-'+id);
+  if(bsLink) bsLink.classList.add('active');
   document.getElementById('sidebar').classList.remove('open');
+  closeBottomSheet();
   const mobileTitle = document.getElementById('mobile-current-title');
   if(mobileTitle) mobileTitle.textContent = NAV_TITLES[id] || id;
+  updateBottomNavLabels(id);
   window.scrollTo(0,0);
+}
+function renderBottomSheet(){
+  const list = document.getElementById('bottom-sheet-list');
+  if(!list) return;
+  list.innerHTML = NAV_GROUPS.map(g=>
+    `<div class="bs-lbl">${g.label}</div>` +
+    g.items.map(id=>`<a id="bnav-${id}" onclick="show('${id}')">${NAV_ICONS[id]||''} ${NAV_TITLES[id]||id}</a>`).join('')
+  ).join('');
+}
+function toggleBottomSheet(){
+  const sheet = document.getElementById('bottom-sheet');
+  const backdrop = document.getElementById('bottom-sheet-backdrop');
+  const isOpen = sheet.classList.toggle('open');
+  backdrop.classList.toggle('open', isOpen);
+}
+function closeBottomSheet(){
+  const sheet = document.getElementById('bottom-sheet');
+  const backdrop = document.getElementById('bottom-sheet-backdrop');
+  if(sheet) sheet.classList.remove('open');
+  if(backdrop) backdrop.classList.remove('open');
+}
+function updateBottomNavLabels(currentId){
+  let idx = NAV_ORDER.indexOf(currentId);
+  if(idx===-1) idx = 0;
+  const prevIdx = (idx-1+NAV_ORDER.length) % NAV_ORDER.length;
+  const nextIdx = (idx+1) % NAV_ORDER.length;
+  const prevEl = document.getElementById('bottom-nav-prev-label');
+  const nextEl = document.getElementById('bottom-nav-next-label');
+  if(prevEl) prevEl.textContent = NAV_TITLES[NAV_ORDER[prevIdx]] || NAV_ORDER[prevIdx];
+  if(nextEl) nextEl.textContent = NAV_TITLES[NAV_ORDER[nextIdx]] || NAV_ORDER[nextIdx];
 }
 function navigateSection(delta){
   const activeLink = document.querySelector('#sidebar nav a.active');
@@ -2591,6 +2703,7 @@ renderAll();
 mergeLiveSeason();
 applyDismissedBoxes();
 applyCollapsedGroups();
+renderBottomSheet();
 
 // Kald Sleeper lazy ved første besøg
 document.getElementById('nav-sleeper').addEventListener('click', () => {
