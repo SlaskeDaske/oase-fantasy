@@ -315,7 +315,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <a onclick="show('sleeper')" id="nav-sleeper">🟢 Aktuel Sæson</a>
     <a onclick="show('powerrankings')" id="nav-powerrankings">📈 Power Rankings</a>
     <a onclick="show('playoffodds')" id="nav-playoffodds">🎲 Playoff Odds</a>
-    <a onclick="show('newsletter')" id="nav-newsletter">📰 Ugens Brev</a>
+    <a onclick="show('newsletter')" id="nav-newsletter">📰 Newsletter</a>
     <div class="nav-lbl">📚 Historik 2018–2025</div>
     <a onclick="show('playoffs')" id="nav-playoffs">🏟️ Playoff Resultater</a>
     <a onclick="show('toiletbowl')" id="nav-toiletbowl">🚽 Toilet Bowl</a>
@@ -535,7 +535,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
 
 <!-- AI NYHEDSBREV -->
 <div class="section" id="section-newsletter">
-  <div class="page-title">📰 UGENS BREV</div>
+  <div class="page-title">📰 NEWSLETTER</div>
   <div class="page-sub">AI-genereret optakt og opsamling — opdateres automatisk hver tirsdag morgen</div>
   <div id="newsletter-content"><div class="info-box">Henter ugens brev...</div></div>
 </div>
@@ -668,7 +668,7 @@ const NAV_ORDER = ['overview','awards','alltime','managers','sleeper','powerrank
 const NAV_TITLES = {
   overview:'Trophy Wall', awards:'Awards', alltime:'All-Time Stats', managers:'Managers',
   sleeper:'Aktuel Sæson', powerrankings:'Power Rankings', playoffodds:'Playoff Odds',
-  newsletter:'Ugens Brev',
+  newsletter:'Newsletter',
   playoffs:'Playoff Resultater', toiletbowl:'Toilet Bowl', standings:'Regular Season',
   matchups:'Matchups', h2h:'Head-to-Head', draft:'Draft', draftgrades:'Draft Grades',
   trades:'Trades', about:'Ligaen'
@@ -1850,9 +1850,18 @@ function renderAbout(){
 const SLEEPER_LEAGUE_ID = '1387759346238128128';
 
 async function fetchSleeper(path) {
-  const r = await fetch(`https://api.sleeper.app/v1${path}`);
-  if(!r.ok) throw new Error(`Sleeper API ${r.status}`);
-  return r.json();
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s — undgår evig hængen på svage forbindelser
+  try {
+    const r = await fetch(`https://api.sleeper.app/v1${path}`, { signal: controller.signal });
+    if(!r.ok) throw new Error(`Sleeper API ${r.status}`);
+    return await r.json();
+  } catch(e) {
+    if(e.name === 'AbortError') throw new Error('Sleeper API svarede ikke inden for 15 sekunder (langsom forbindelse?)');
+    throw e;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 // Sleeper display_name -> vores manager-navne.
