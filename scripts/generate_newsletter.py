@@ -27,10 +27,10 @@ GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta"
 # I stedet for at hardkode ét navn spørger vi API'et hvad der faktisk findes,
 # og vælger den bedste tilgængelige Flash-model. Rækkefølgen er præference.
 MODEL_PREFERENCE = [
-    "gemini-flash-latest",
+    "gemini-3-flash-preview",  # bekræftet stabil i praksis (Sep 2026)
     "gemini-3-flash",
+    "gemini-flash-latest",
     "gemini-2.5-flash",
-    "gemini-flash",
 ]
 
 # Sleeper display_name -> manager (samme mapping som på hjemmesiden)
@@ -146,10 +146,10 @@ def pick_models(api_key):
                      if "flash" in m and "image" not in m and "tts" not in m and m not in ordered)
     ordered.extend(flashes)
     if not ordered:
-        ordered = usable[:3]
+        ordered = usable[:2]
 
-    print(f"Tilgængelige modeller (prioriteret): {', '.join(ordered[:4])}")
-    return ordered[:4]
+    print(f"Tilgængelige modeller (prioriteret): {', '.join(ordered[:2])}", flush=True)
+    return ordered[:2]
 
 
 def generate_with_fallback(api_key, models, prompt, label):
@@ -157,21 +157,27 @@ def generate_with_fallback(api_key, models, prompt, label):
     last = None
     for i, model in enumerate(models):
         try:
-            print(f"{label} med {model}...")
+            print(f"{label} med {model}...", flush=True)
             return call_gemini(api_key, model, prompt), model
         except SystemExit as e:
             last = str(e)
             if i < len(models) - 1:
-                print(f"  {model} kunne ikke bruges — skifter til næste model.")
+                print(f"  {model} kunne ikke bruges — skifter til næste model.", flush=True)
                 continue
     raise SystemExit(f"Alle modeller fejlede. Sidste fejl: {last}")
 
 
-def call_gemini(api_key, model, prompt, attempts=5):
-    """Kalder Gemini med automatiske genforsøg ved midlertidige fejl (503/429/500)."""
+def call_gemini(api_key, model, prompt, attempts=3):
+    """Kalder Gemini med automatiske genforsøg ved midlertidige fejl (503/429/500).
+    Maks samlet ventetid: ca. 30s (10s + 20s) plus selve kaldene — aldrig mere end
+    et par minutter i alt, så et enkelt kald aldrig kan få hele jobbet til at hænge."""
     body = json.dumps({
         "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {"temperature": 0.9, "maxOutputTokens": 1200},
+        "generationConfig": {
+            "temperature": 0.9,
+            "maxOutputTokens": 2000,
+            "thinkingConfig": {"thinkingBudget": 0},
+        },
     }).encode()
 
     last_error = None
@@ -183,11 +189,23 @@ def call_gemini(api_key, model, prompt, attempts=5):
             method="POST",
         )
         try:
-            with urllib.request.urlopen(req, timeout=120) as r:
+            with urllib.request.urlopen(req, timeout=45) as r:
                 data = json.loads(r.read().decode())
             try:
-                parts = data["candidates"][0]["content"]["parts"]
-                return "".join(p.get("text", "") for p in parts).strip()
+                candidate = data["candidates"][0]
+                parts = candidate["content"]["parts"]
+                text = "".join(p.get("text", "") for p in parts).strip()
+                finish_reason = candidate.get("finishReason", "?")
+                usage = data.get("usageMetadata", {})
+                if finish_reason == "MAX_TOKENS" or len(text) < 100:
+                    print(f"  ADVARSEL: kort/afskåret svar ({len(text)} tegn, finishReason={finish_reason}, "
+                          f"thoughts={usage.get('thoughtsTokenCount','?')}, output={usage.get('candidatesTokenCount','?')})", flush=True)
+                    if not text and attempt < attempts:
+                        wait = 10 * attempt
+                        print(f"  Prøver igen om {wait}s...", flush=True)
+                        time.sleep(wait)
+                        continue
+                return text
             except (KeyError, IndexError):
                 raise SystemExit(f"Uventet Gemini-svar: {json.dumps(data)[:500]}")
 
@@ -196,8 +214,8 @@ def call_gemini(api_key, model, prompt, attempts=5):
             last_error = f"HTTP {e.code}: {detail}"
             # 503 = overbelastet, 429 = rate limit, 500 = intern fejl. Alle kan lykkes ved genforsøg.
             if e.code in (429, 500, 503) and attempt < attempts:
-                wait = min(2 ** attempt * 5, 90)  # 10s, 20s, 40s, 80s
-                print(f"  Forsøg {attempt}/{attempts} fejlede ({e.code}) — venter {wait}s og prøver igen...")
+                wait = 10 * attempt  # 10s, 20s
+                print(f"  Forsøg {attempt}/{attempts} fejlede ({e.code}) — venter {wait}s og prøver igen...", flush=True)
                 time.sleep(wait)
                 continue
             raise SystemExit(f"Gemini API fejl — {last_error}")
@@ -205,8 +223,8 @@ def call_gemini(api_key, model, prompt, attempts=5):
         except urllib.error.URLError as e:
             last_error = str(e)
             if attempt < attempts:
-                wait = min(2 ** attempt * 5, 90)
-                print(f"  Forsøg {attempt}/{attempts} fejlede (netværk) — venter {wait}s...")
+                wait = 10 * attempt
+                print(f"  Forsøg {attempt}/{attempts} fejlede (netværk) — venter {wait}s...", flush=True)
                 time.sleep(wait)
                 continue
             raise SystemExit(f"Netværksfejl mod Gemini: {last_error}")
@@ -231,7 +249,7 @@ def main():
     status = league.get("status")
 
     if status == "pre_draft":
-        print("Sæsonen er ikke startet endnu — intet at generere.")
+        print("Sæsonen er ikke startet endnu — intet at generere.", flush=True)
         return
 
     state = fetch_json(f"{SLEEPER}/state/nfl")
@@ -339,7 +357,7 @@ Skriv en OPSAMLING på uge {last_played} på cirka 150-200 ord. Fremhæv ugens b
 den mest pinlige, og eventuelle bad beats (høj score der alligevel tabte). Kommentér kort på stillingen.
 Skriv kun selve teksten."""
 
-    print("Vælger model...")
+    print("Vælger model...", flush=True)
     models = pick_models(api_key)
     preview, used_model = generate_with_fallback(api_key, models, preview_prompt, "Genererer optakt")
     recap, _ = generate_with_fallback(api_key, models, recap_prompt, "Genererer opsamling")
@@ -355,7 +373,7 @@ Skriv kun selve teksten."""
     }
     with open("newsletter.json", "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=2)
-    print(f"newsletter.json skrevet ({len(preview)} + {len(recap)} tegn).")
+    print(f"newsletter.json skrevet ({len(preview)} + {len(recap)} tegn).", flush=True)
 
 
 if __name__ == "__main__":
