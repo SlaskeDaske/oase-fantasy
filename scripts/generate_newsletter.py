@@ -14,14 +14,24 @@ import json
 import os
 import re
 import sys
+import time
 import urllib.request
 import urllib.error
 from datetime import datetime, timezone
 
 LEAGUE_ID = "1387759346238128128"
 SLEEPER = "https://api.sleeper.app/v1"
-GEMINI_MODEL = "gemini-flash-latest"  # alias: peger altid på nyeste Flash-model
-GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
+GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta"
+
+# Modelnavne hos Google skifter ofte (aliaser repointes, versioner udfases).
+# I stedet for at hardkode ét navn spørger vi API'et hvad der faktisk findes,
+# og vælger den bedste tilgængelige Flash-model. Rækkefølgen er præference.
+MODEL_PREFERENCE = [
+    "gemini-flash-latest",
+    "gemini-3-flash",
+    "gemini-2.5-flash",
+    "gemini-flash",
+]
 
 # Sleeper display_name -> manager (samme mapping som på hjemmesiden)
 SLEEPER_TO_MANAGER = {
@@ -105,35 +115,116 @@ def title_counts(playoffs):
     return counts
 
 
-def call_gemini(api_key, prompt):
+def pick_models(api_key):
+    """Returnerer en prioriteret liste af brugbare modeller (til fallback)."""
+    req = urllib.request.Request(
+        f"{GEMINI_BASE}/models",
+        headers={"x-goog-api-key": api_key},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            data = json.loads(r.read().decode())
+    except urllib.error.HTTPError as e:
+        detail = e.read().decode()[:500]
+        raise SystemExit(
+            f"Kunne ikke hente modelliste (HTTP {e.code}).\n"
+            f"Tjek at GEMINI_API_KEY-secreten indeholder selve nøglen (ikke projekt-ID).\n"
+            f"Svar fra Google: {detail}"
+        )
+
+    usable = []
+    for m in data.get("models", []):
+        name = m.get("name", "").replace("models/", "")
+        if "generateContent" in (m.get("supportedGenerationMethods") or []):
+            usable.append(name)
+
+    if not usable:
+        raise SystemExit("Ingen modeller med generateContent tilgængelige for denne nøgle.")
+
+    ordered = [p for p in MODEL_PREFERENCE if p in usable]
+    flashes = sorted(m for m in usable
+                     if "flash" in m and "image" not in m and "tts" not in m and m not in ordered)
+    ordered.extend(flashes)
+    if not ordered:
+        ordered = usable[:3]
+
+    print(f"Tilgængelige modeller (prioriteret): {', '.join(ordered[:4])}")
+    return ordered[:4]
+
+
+def generate_with_fallback(api_key, models, prompt, label):
+    """Prøver hver model i rækkefølge — skifter kun hvis en model er permanent utilgængelig."""
+    last = None
+    for i, model in enumerate(models):
+        try:
+            print(f"{label} med {model}...")
+            return call_gemini(api_key, model, prompt), model
+        except SystemExit as e:
+            last = str(e)
+            if i < len(models) - 1:
+                print(f"  {model} kunne ikke bruges — skifter til næste model.")
+                continue
+    raise SystemExit(f"Alle modeller fejlede. Sidste fejl: {last}")
+
+
+def call_gemini(api_key, model, prompt, attempts=5):
+    """Kalder Gemini med automatiske genforsøg ved midlertidige fejl (503/429/500)."""
     body = json.dumps({
         "contents": [{"parts": [{"text": prompt}]}],
         "generationConfig": {"temperature": 0.9, "maxOutputTokens": 1200},
     }).encode()
-    req = urllib.request.Request(
-        GEMINI_URL,
-        data=body,
-        headers={"Content-Type": "application/json", "x-goog-api-key": api_key},
-        method="POST",
-    )
-    try:
-        with urllib.request.urlopen(req, timeout=90) as r:
-            data = json.loads(r.read().decode())
-    except urllib.error.HTTPError as e:
-        detail = e.read().decode()[:400]
-        raise SystemExit(f"Gemini API fejl {e.code}: {detail}")
 
-    try:
-        parts = data["candidates"][0]["content"]["parts"]
-        return "".join(p.get("text", "") for p in parts).strip()
-    except (KeyError, IndexError):
-        raise SystemExit(f"Uventet Gemini-svar: {json.dumps(data)[:400]}")
+    last_error = None
+    for attempt in range(1, attempts + 1):
+        req = urllib.request.Request(
+            f"{GEMINI_BASE}/models/{model}:generateContent",
+            data=body,
+            headers={"Content-Type": "application/json", "x-goog-api-key": api_key},
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=120) as r:
+                data = json.loads(r.read().decode())
+            try:
+                parts = data["candidates"][0]["content"]["parts"]
+                return "".join(p.get("text", "") for p in parts).strip()
+            except (KeyError, IndexError):
+                raise SystemExit(f"Uventet Gemini-svar: {json.dumps(data)[:500]}")
+
+        except urllib.error.HTTPError as e:
+            detail = e.read().decode()[:300]
+            last_error = f"HTTP {e.code}: {detail}"
+            # 503 = overbelastet, 429 = rate limit, 500 = intern fejl. Alle kan lykkes ved genforsøg.
+            if e.code in (429, 500, 503) and attempt < attempts:
+                wait = min(2 ** attempt * 5, 90)  # 10s, 20s, 40s, 80s
+                print(f"  Forsøg {attempt}/{attempts} fejlede ({e.code}) — venter {wait}s og prøver igen...")
+                time.sleep(wait)
+                continue
+            raise SystemExit(f"Gemini API fejl — {last_error}")
+
+        except urllib.error.URLError as e:
+            last_error = str(e)
+            if attempt < attempts:
+                wait = min(2 ** attempt * 5, 90)
+                print(f"  Forsøg {attempt}/{attempts} fejlede (netværk) — venter {wait}s...")
+                time.sleep(wait)
+                continue
+            raise SystemExit(f"Netværksfejl mod Gemini: {last_error}")
+
+    raise SystemExit(f"Gav op efter {attempts} forsøg. Sidste fejl: {last_error}")
 
 
 def main():
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         raise SystemExit("GEMINI_API_KEY mangler (sæt den som GitHub Secret).")
+    api_key = api_key.strip()
+    if api_key.startswith("gen-lang-client") or api_key.startswith("projects/"):
+        raise SystemExit(
+            "GEMINI_API_KEY ser ud til at indeholde et projekt-ID, ikke en API-nøgle.\n"
+            "Hent den rigtige nøgle i Google AI Studio (Projects -> klik på 'x key' -> Copy key)\n"
+            "og opdatér GitHub-secreten."
+        )
 
     league = fetch_json(f"{SLEEPER}/league/{LEAGUE_ID}")
     season = league.get("season")
@@ -248,10 +339,10 @@ Skriv en OPSAMLING på uge {last_played} på cirka 150-200 ord. Fremhæv ugens b
 den mest pinlige, og eventuelle bad beats (høj score der alligevel tabte). Kommentér kort på stillingen.
 Skriv kun selve teksten."""
 
-    print("Genererer optakt...")
-    preview = call_gemini(api_key, preview_prompt)
-    print("Genererer opsamling...")
-    recap = call_gemini(api_key, recap_prompt)
+    print("Vælger model...")
+    models = pick_models(api_key)
+    preview, used_model = generate_with_fallback(api_key, models, preview_prompt, "Genererer optakt")
+    recap, _ = generate_with_fallback(api_key, models, recap_prompt, "Genererer opsamling")
 
     out = {
         "generated": datetime.now(timezone.utc).isoformat(),
@@ -260,6 +351,7 @@ Skriv kun selve teksten."""
         "recapWeek": last_played,
         "preview": preview,
         "recap": recap,
+        "model": used_model,
     }
     with open("newsletter.json", "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=2)
