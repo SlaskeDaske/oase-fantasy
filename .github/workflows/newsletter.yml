@@ -1,0 +1,39 @@
+name: Ugentligt AI-nyhedsbrev
+
+on:
+  schedule:
+    # Hver tirsdag kl. 08:00 dansk tid (07:00 UTC) — efter Monday Night Football
+    - cron: '0 7 * * 2'
+  workflow_dispatch:   # gør det muligt at køre manuelt fra Actions-fanen
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hent repo
+        uses: actions/checkout@v4
+
+      - name: Opsæt Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Generér nyhedsbrev
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python scripts/generate_newsletter.py
+
+      - name: Commit hvis der er ændringer
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [ -n "$(git status --porcelain newsletter.json)" ]; then
+            git add newsletter.json
+            git commit -m "Ugentligt AI-nyhedsbrev $(date -u +%Y-%m-%d)"
+            git push
+          else
+            echo "Ingen ændringer i newsletter.json — intet at committe."
+          fi
