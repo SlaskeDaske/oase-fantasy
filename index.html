@@ -2600,7 +2600,7 @@ async function renderNewsletter(){
       <div class="nl-card recap">
         <div class="nl-head">
           <div class="nl-title">📋 Opsamling</div>
-          <div class="nl-week">Uge ${nl.recapWeek} · ${nl.season}</div>
+          <div class="nl-week">${nl.recapWeek!=null ? `Uge ${nl.recapWeek} · ${nl.season}` : 'Endnu ingen kampe'}</div>
         </div>
         <div class="nl-body">${toParagraphs(nl.recap)}</div>
       </div>
