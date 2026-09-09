@@ -1980,7 +1980,9 @@ async function renderSleeper() {
   } catch(e) {
     statusEl.textContent = 'Fejl';
     statusEl.style.color = 'var(--red)';
-    el.innerHTML = `<div class="info-box"><strong>Kunne ikke hente Sleeper-data:</strong> ${e.message}<br>Tjek at liga-ID er korrekt og at du har internetforbindelse.</div>`;
+    const timedOut = e.name === 'AbortError';
+    el.innerHTML = `<div class="info-box"><strong>Kunne ikke hente Sleeper-data:</strong> ${timedOut ? 'Anmodningen tog for lang tid (over 15 sekunder) — mulig netværksbegrænsning på din enhed.' : e.message}<br>Klik på fanen igen for at prøve forfra.</div>`;
+    throw e; // lad kalderen vide at det fejlede, så den ikke markerer som "hentet"
   }
 }
 
@@ -2575,15 +2577,18 @@ function simulatePlayoffOdds(year, numSims=2000){
 let newsletterLoaded = false;
 async function renderNewsletter(){
   if(newsletterLoaded) return;
-  newsletterLoaded = true;
   const el = document.getElementById('newsletter-content');
   if(!el) return;
 
   const toParagraphs = txt => String(txt||'').trim().split(/\n\s*\n/)
     .map(p=>`<p>${p.replace(/\n/g,' ').trim()}</p>`).join('');
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15000);
+
   try{
-    const res = await fetch('newsletter.json?t=' + Date.now());
+    const res = await fetch('newsletter.json?t=' + Date.now(), { signal: controller.signal, cache: 'no-store' });
+    clearTimeout(timeoutId);
     if(!res.ok) throw new Error('ikke fundet');
     const nl = await res.json();
     const when = nl.generated ? new Date(nl.generated).toLocaleString('da-DK',
@@ -2605,8 +2610,15 @@ async function renderNewsletter(){
         <div class="nl-body">${toParagraphs(nl.recap)}</div>
       </div>
       <div class="nl-meta">Skrevet af Gemini ud fra ligaens faktiske data · senest opdateret ${when} · genereres automatisk hver tirsdag morgen</div>`;
+    newsletterLoaded = true; // kun markér som hentet ved succes, så et nyt besøg kan prøve igen ved fejl
   }catch(e){
-    el.innerHTML = `<div class="info-box">Der er endnu ikke genereret et nyhedsbrev. Det sker automatisk hver tirsdag morgen når sæsonen er i gang — eller kan startes manuelt fra <strong>Actions</strong>-fanen i GitHub-repoet.</div>`;
+    clearTimeout(timeoutId);
+    const timedOut = e.name === 'AbortError';
+    el.innerHTML = `<div class="info-box">
+      ${timedOut
+        ? '<strong>Kunne ikke hente nyhedsbrevet inden for 15 sekunder.</strong> Det tyder på et netværksproblem på din enhed lige nu (langsom forbindelse, VPN, eller "Data Saver"-tilstand i browseren) — prøv at genindlæse siden eller skifte netværk.'
+        : 'Der er endnu ikke genereret et nyhedsbrev. Det sker automatisk hver tirsdag morgen når sæsonen er i gang — eller kan startes manuelt fra <strong>Actions</strong>-fanen i GitHub-repoet.'}
+    </div>`;
   }
 }
 
@@ -2786,12 +2798,14 @@ applyDismissedBoxes();
 applyCollapsedGroups();
 renderBottomSheet();
 
-// Kald Sleeper lazy ved første besøg
-document.getElementById('nav-sleeper').addEventListener('click', () => {
-  if(!document.getElementById('sleeper-content').dataset.loaded) {
-    document.getElementById('sleeper-content').dataset.loaded = '1';
-    renderSleeper();
-  }
+// Kald Sleeper lazy ved første besøg (kun markér som hentet ved succes, så fejl kan prøves igen)
+document.getElementById('nav-sleeper').addEventListener('click', async () => {
+  const el = document.getElementById('sleeper-content');
+  if(el.dataset.loaded === '1') return;
+  try {
+    await renderSleeper();
+    el.dataset.loaded = '1';
+  } catch(e) { /* renderSleeper håndterer selv sin fejlvisning */ }
 });
 
 // Hent nyhedsbrev ved første besøg på fanen
