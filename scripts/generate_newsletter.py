@@ -254,7 +254,10 @@ def main():
 
     state = fetch_json(f"{SLEEPER}/state/nfl")
     current_week = state.get("week", 1)
-    last_played = max(1, current_week - 1)
+    # 0 betyder "ingen tidligere uge er spillet endnu" — sker kun i selve uge 1,
+    # inden nogen kampe er gået i gang. Skal IKKE tvinges op til 1, ellers beder
+    # vi AI'en skrive en opsamling af en uge der aldrig blev spillet.
+    last_played = current_week - 1
 
     rosters = fetch_json(f"{SLEEPER}/league/{LEAGUE_ID}/rosters")
     users = fetch_json(f"{SLEEPER}/league/{LEAGUE_ID}/users")
@@ -298,7 +301,7 @@ def main():
             })
         return out
 
-    last_results = [g for g in week_games(last_played) if g["s1"] or g["s2"]]
+    last_results = [g for g in week_games(last_played) if g["s1"] or g["s2"]] if last_played >= 1 else []
     upcoming = week_games(current_week)
 
     raw, playoffs = load_history()
@@ -312,16 +315,18 @@ def main():
     if NEW_MANAGERS_2026:
         ctx.append("Debutanter i år: " + ", ".join(sorted(NEW_MANAGERS_2026)) + " (aldrig spillet i ligaen før).")
 
-    ctx.append(f"\nSTILLING EFTER UGE {last_played}:")
-    for i, s in enumerate(standings, 1):
-        ctx.append(f"{i}. {s['manager']} ({s['team']}) {s['wins']}-{s['losses']}, PF {s['pf']}, PA {s['pa']}")
-
-    if last_results:
+    if last_played >= 1 and last_results:
+        ctx.append(f"\nSTILLING EFTER UGE {last_played}:")
+        for i, s in enumerate(standings, 1):
+            ctx.append(f"{i}. {s['manager']} ({s['team']}) {s['wins']}-{s['losses']}, PF {s['pf']}, PA {s['pa']}")
         ctx.append(f"\nRESULTATER UGE {last_played}:")
         for g in last_results:
             w, l = (g["m1"], g["m2"]) if g["s1"] > g["s2"] else (g["m2"], g["m1"])
             hi, lo = max(g["s1"], g["s2"]), min(g["s1"], g["s2"])
             ctx.append(f"{w} slog {l} {hi:.2f}-{lo:.2f}")
+    else:
+        ctx.append("\nSÆSONEN ER ENDNU IKKE GÅET I GANG — ingen kampe er spillet, alle hold står 0-0. "
+                    "Der findes ingen stilling eller resultater at referere til endnu.")
 
     if upcoming:
         ctx.append(f"\nKOMMENDE KAMPE UGE {current_week} (med all-time indbyrdes rekord siden 2018):")
@@ -334,39 +339,48 @@ def main():
     context = "\n".join(ctx)
 
     tone = (
-        "Du er kommissær og fast skribent for en dansk fantasy football-liga blandt venner og kolleger. "
-        "Skriv på dansk, i en humoristisk og let hånlig tone med kærlig drilleri — som en ven der driller, "
-        "ikke som en der mobber. Brug managernes fornavne. Vær konkret og henvis til de faktiske tal. "
-        "Ingen overskrifter i markdown, ingen punktopstilling med bindestreger — skriv i flydende afsnit. "
-        "Undgå at opfinde spillernavne eller kampe der ikke står i data."
+        "Du er en tør, analytisk sportsskribent for en dansk fantasy football-liga blandt venner og kolleger. "
+        "Skriv på dansk i en nøgtern, næsten kommentator-agtig stil — tænk sportsjournalistik, ikke stand-up. "
+        "Et diskret glimt i øjet er velkomment (en tør bemærkning, et underspillet ordvalg), men hold det "
+        "meget sparsomt — maks én-to steder i teksten, aldrig mere end det. Ingen overdrevne metaforer, "
+        "ingen påtaget dramatik, ingen gentagne vittigheder. Brug managernes fornavne. Vær konkret og henvis "
+        "præcist til de faktiske tal og den faktiske historik. Ingen overskrifter i markdown, ingen "
+        "punktopstilling — skriv i flydende afsnit. Undgå for enhver pris at opfinde spillernavne, kampe "
+        "eller resultater der ikke fremgår eksplicit af data nedenfor."
     )
 
     preview_prompt = f"""{tone}
 
 {context}
 
-Skriv en OPTAKT til uge {current_week} på cirka 150-200 ord. Fremhæv det mest spændende opgør
-(brug den indbyrdes historik hvor det er sjovt), nævn hvis en debutant står over for en veteran,
-og slut med en kort forudsigelse. Skriv kun selve teksten."""
-
-    recap_prompt = f"""{tone}
-
-{context}
-
-Skriv en OPSAMLING på uge {last_played} på cirka 150-200 ord. Fremhæv ugens bedste præstation,
-den mest pinlige, og eventuelle bad beats (høj score der alligevel tabte). Kommentér kort på stillingen.
-Skriv kun selve teksten."""
+Skriv en OPTAKT til uge {current_week} på cirka 150-200 ord. Fremhæv det mest interessante opgør
+(brug den indbyrdes historik hvor det er relevant), nævn hvis en debutant står over for en veteran,
+og slut med en kort, analytisk vurdering. Skriv kun selve teksten."""
 
     print("Vælger model...", flush=True)
     models = pick_models(api_key)
     preview, used_model = generate_with_fallback(api_key, models, preview_prompt, "Genererer optakt")
-    recap, _ = generate_with_fallback(api_key, models, recap_prompt, "Genererer opsamling")
+
+    has_recap_data = last_played >= 1 and len(last_results) > 0
+    if has_recap_data:
+        recap_prompt = f"""{tone}
+
+{context}
+
+Skriv en OPSAMLING på uge {last_played} på cirka 150-200 ord. Fremhæv ugens bedste præstation,
+den svageste indsats, og eventuelle bad beats (høj score der alligevel tabte). Kommentér kort på stillingen.
+Skriv kun selve teksten."""
+        recap, _ = generate_with_fallback(api_key, models, recap_prompt, "Genererer opsamling")
+    else:
+        print("Ingen tidligere uge at opsummere endnu (sæsonen er lige startet) — springer opsamling over.", flush=True)
+        recap = ("Sæsonen er lige gået i gang, og der er endnu ikke spillet nogen kampe. "
+                 "Den første opsamling kommer, så snart uge 1 er overstået.")
 
     out = {
         "generated": datetime.now(timezone.utc).isoformat(),
         "season": season,
         "previewWeek": current_week,
-        "recapWeek": last_played,
+        "recapWeek": last_played if has_recap_data else None,
         "preview": preview,
         "recap": recap,
         "model": used_model,
