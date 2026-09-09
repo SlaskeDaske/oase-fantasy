@@ -701,7 +701,26 @@ function show(id){
   if(mobileTitle) mobileTitle.textContent = NAV_TITLES[id] || id;
   updateBottomNavLabels(id);
   window.scrollTo(0,0);
+  triggerLazyLoad(id);
 }
+
+// Centraliseret her (i stedet for på enkelte click-lyttere), så data-hentning
+// altid udløses — uanset om man navigerer via sidebar, bund-pile, bund-menu
+// eller top-pile på mobil. Tidligere var dette kun bundet til ét specifikt
+// sidebar-link, hvilket betød "Aktuel Sæson" aldrig loadede hvis man brugte
+// mobil-navigationen til at komme dertil.
+function triggerLazyLoad(id){
+  if(id === 'sleeper'){
+    const el = document.getElementById('sleeper-content');
+    if(el.dataset.loaded !== '1'){
+      renderSleeper().then(()=>{ el.dataset.loaded = '1'; }).catch(()=>{ /* fejl vises allerede i UI */ });
+    }
+  }
+  if(id === 'newsletter'){
+    renderNewsletter();
+  }
+}
+
 function renderBottomSheet(){
   const list = document.getElementById('bottom-sheet-list');
   if(!list) return;
@@ -1888,8 +1907,10 @@ function resolveManager(sleeperName) {
 async function renderSleeper() {
   const el = document.getElementById('sleeper-content');
   const statusEl = document.getElementById('sl-status');
+  el.innerHTML = `<div class="info-box">Henter liga-info fra Sleeper...</div>`;
   try {
     const league = await fetchSleeper(`/league/${SLEEPER_LEAGUE_ID}`);
+    el.innerHTML = `<div class="info-box">Bygger standings...</div>`;
     const season = league.season;
     const status = league.status; // pre_draft, drafting, in_season, complete
 
@@ -2797,22 +2818,9 @@ mergeLiveSeason();
 applyDismissedBoxes();
 applyCollapsedGroups();
 renderBottomSheet();
-
-// Kald Sleeper lazy ved første besøg (kun markér som hentet ved succes, så fejl kan prøves igen)
-document.getElementById('nav-sleeper').addEventListener('click', async () => {
-  const el = document.getElementById('sleeper-content');
-  if(el.dataset.loaded === '1') return;
-  try {
-    await renderSleeper();
-    el.dataset.loaded = '1';
-  } catch(e) { /* renderSleeper håndterer selv sin fejlvisning */ }
-});
-
-// Hent nyhedsbrev ved første besøg på fanen
-document.getElementById('nav-newsletter').addEventListener('click', renderNewsletter);
-document.addEventListener('click', e => {
-  if(e.target && e.target.id === 'bnav-newsletter') renderNewsletter();
-});
+// Bemærk: data-hentning til Aktuel Sæson og Newsletter udløses nu centralt
+// fra show()/triggerLazyLoad() ovenfor — virker uanset hvilken af de fire
+// navigationsveje (sidebar, top-pile, bund-pile, bund-menu) der bruges.
 </script>
 </body>
 </html>
