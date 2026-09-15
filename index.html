@@ -2551,11 +2551,29 @@ function simulatePlayoffOdds(year, numSims=2000){
     scoresByManager[m.m1].push(m.s1);
     scoresByManager[m.m2].push(m.s2);
   });
+
+  // Liga-bred baseline — bruges til at "trække" tynde datasæt tilbage mod
+  // midten tidligt i sæsonen.
+  const allScores = Object.values(scoresByManager).flat();
+  const leagueMean = allScores.reduce((a,b)=>a+b,0)/allScores.length;
+  const leagueVariance = allScores.reduce((a,b)=>a+(b-leagueMean)**2,0)/allScores.length;
+  const leagueStdev = Math.sqrt(leagueVariance) || 20;
+
+  // Shrinkage-styrke: svarer til at antage K "fantom-kampe" af liga-gennemsnit
+  // oveni de reelle. Jo flere reelle kampe, jo mere vejer personlige tal.
+  const K = 6;
   const dist = {};
   Object.entries(scoresByManager).forEach(([m,scores])=>{
-    const mean = scores.reduce((a,b)=>a+b,0)/scores.length;
-    const variance = scores.reduce((a,b)=>a+(b-mean)**2,0)/scores.length;
-    dist[m] = {mean, stdev: Math.sqrt(variance) || 15};
+    const n = scores.length;
+    const personalMean = scores.reduce((a,b)=>a+b,0)/n;
+    const weight = n/(n+K);
+    const blendedMean = weight*personalMean + (1-weight)*leagueMean;
+    // Usikkerhed OM selve gennemsnittet — stor tidligt i sæsonen, aftager med flere kampe.
+    // Dette er afgørende: uden det ville selv en lille, usikker fordel blive kunstigt
+    // forstærket til falsk sikkerhed over mange resterende kampe (de store tals lov
+    // udligner kun tilfældig STØJ, ikke usikkerhed om det underliggende niveau).
+    const meanUncertainty = leagueStdev / Math.sqrt(n + K);
+    dist[m] = {mean: blendedMean, meanUncertainty, weeklyStdev: leagueStdev};
   });
 
   const managers = s.standings.map(st=>st.manager);
@@ -2564,15 +2582,23 @@ function simulatePlayoffOdds(year, numSims=2000){
 
   for(let sim=0; sim<numSims; sim++){
     const simStats = {};
+    // Trin 1: træk ÉT usikkert "sandt niveau" per manager for denne simulering.
+    // Det niveau holdes fast gennem alle resterende kampe i DENNE simulering —
+    // men varierer fra simulering til simulering, hvilket er det der korrekt
+    // fanger at vi reelt ikke ved, hvor gode holdene er endnu.
+    const trialMean = {};
     managers.forEach(m=>{
+      const d = dist[m] || {mean:110, meanUncertainty:20, weeklyStdev:20};
+      trialMean[m] = gaussianRandom(d.mean, d.meanUncertainty);
       const st = s.standings.find(x=>x.manager===m);
       simStats[m] = {wins:st.wins, losses:st.losses, pf:st.pf};
     });
+    // Trin 2: simuler de faktiske kampe med almindelig uge-til-uge støj omkring det niveau.
     futureSched.forEach(g=>{
-      const d1 = dist[g.m1] || {mean:110,stdev:20};
-      const d2 = dist[g.m2] || {mean:110,stdev:20};
-      const score1 = Math.max(0, gaussianRandom(d1.mean, d1.stdev));
-      const score2 = Math.max(0, gaussianRandom(d2.mean, d2.stdev));
+      const d1 = dist[g.m1] || {weeklyStdev:20};
+      const d2 = dist[g.m2] || {weeklyStdev:20};
+      const score1 = Math.max(0, gaussianRandom(trialMean[g.m1] ?? 110, d1.weeklyStdev));
+      const score2 = Math.max(0, gaussianRandom(trialMean[g.m2] ?? 110, d2.weeklyStdev));
       if(score1>score2){ simStats[g.m1].wins++; simStats[g.m2].losses++; }
       else { simStats[g.m2].wins++; simStats[g.m1].losses++; }
       simStats[g.m1].pf += score1;
@@ -2672,7 +2698,7 @@ function renderPlayoffOdds(){
     </tr>`;
   });
   html += '</tbody></table>';
-  html += `<div class="info-box" style="margin-top:16px">Baseret på 2.000 simuleringer af resten af den regulære sæson. Hver managers kommende scores trækkes fra en normalfordeling baseret på deres egen scoringshistorik i år (gennemsnit + spredning). "Slutspil %" = andel af simuleringer hvor manageren ender i top 4. "Bedste plads %" = andel hvor de ender som #1 samlet — ikke det samme som at vinde selve mesterskabet, da playoff-brackets har deres eget element af tilfældighed.</div>`;
+  html += `<div class="info-box" style="margin-top:16px">Baseret på 2.000 simuleringer af resten af den regulære sæson, med to lag af usikkerhed: for hver simulering trækkes først et usikkert gæt på hver managers "sande niveau" (bredt usikkert tidligt i sæsonen, indsnævres med flere spillede kampe), og derefter simuleres selve kampene med normal uge-til-uge variation omkring det niveau. Det forhindrer at en enkelt god eller dårlig uge tidligt i sæsonen bliver kunstigt forstærket til falsk skråsikkerhed, bare fordi der er mange kampe tilbage at "udligne" over. "Slutspil %" = andel af simuleringer hvor manageren ender i top 4. "Bedste plads %" = andel hvor de ender som #1 samlet — ikke det samme som at vinde selve mesterskabet, da playoff-brackets har deres eget element af tilfældighed.</div>`;
   el.innerHTML = html;
 }
 
