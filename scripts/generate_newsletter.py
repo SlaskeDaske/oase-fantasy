@@ -148,8 +148,8 @@ def pick_models(api_key):
     if not ordered:
         ordered = usable[:2]
 
-    print(f"Tilgængelige modeller (prioriteret): {', '.join(ordered[:2])}", flush=True)
-    return ordered[:2]
+    print(f"Tilgængelige modeller (prioriteret): {', '.join(ordered[:3])}", flush=True)
+    return ordered[:3]
 
 
 def generate_with_fallback(api_key, models, prompt, label):
@@ -376,7 +376,7 @@ Skriv kun selve teksten."""
         recap = ("Sæsonen er lige gået i gang, og der er endnu ikke spillet nogen kampe. "
                  "Den første opsamling kommer, så snart uge 1 er overstået.")
 
-    out = {
+    issue = {
         "generated": datetime.now(timezone.utc).isoformat(),
         "season": season,
         "previewWeek": current_week,
@@ -385,9 +385,29 @@ Skriv kun selve teksten."""
         "recap": recap,
         "model": used_model,
     }
+
+    # Behold historikken: læs eksisterende udgaver (hvis filen findes fra en tidligere
+    # uge), læg den nye forrest, og undgå dubletter hvis jobbet skulle køre to gange
+    # i samme uge (så overskriver vi den eksisterende udgave for den uge i stedet for
+    # at tilføje endnu en).
+    MAX_ISSUES = 30  # ~et par sæsoners ugentlige udgaver — rigeligt til at bladre i
+    issues = []
+    try:
+        with open("newsletter.json", "r", encoding="utf-8") as f:
+            existing = json.load(f)
+        issues = existing.get("issues", [existing] if "preview" in existing else [])
+    except (FileNotFoundError, json.JSONDecodeError):
+        issues = []
+
+    issues = [i for i in issues
+              if not (i.get("season") == season and i.get("previewWeek") == current_week)]
+    issues.insert(0, issue)
+    issues = issues[:MAX_ISSUES]
+
+    out = {"issues": issues}
     with open("newsletter.json", "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=2)
-    print(f"newsletter.json skrevet ({len(preview)} + {len(recap)} tegn).", flush=True)
+    print(f"newsletter.json skrevet ({len(preview)} + {len(recap)} tegn), {len(issues)} udgave(r) i historikken.", flush=True)
 
 
 if __name__ == "__main__":
