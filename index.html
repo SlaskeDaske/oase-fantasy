@@ -316,6 +316,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <a onclick="show('overview')" id="nav-overview" class="active">🏆 Trophy Wall</a>
     <a onclick="show('awards')" id="nav-awards">🥇 Awards</a>
     <a onclick="show('alltime')" id="nav-alltime">📈 All-Time Stats</a>
+    <a onclick="show('stathighlights')" id="nav-stathighlights">⭐ Stat Highlights</a>
     <a onclick="show('managers')" id="nav-managers">👤 Managers</a>
     <div class="nav-lbl">💤 Live (Sleeper)</div>
     <a onclick="show('sleeper')" id="nav-sleeper">🟢 Aktuel Sæson</a>
@@ -368,10 +369,44 @@ tr:hover td{background:rgba(255,255,255,.02)}
   <div class="page-title">ALL-TIME STATS</div>
   <div class="page-sub">Kumulerede tal på tværs af alle 8 sæsoner</div>
   <div class="sec-title">Points For <span>gennemsnit per sæson</span></div>
-  <div class="chart-wrap"><div class="chart-lbl">Gennemsnitlig PF/sæson per manager</div><canvas id="pfChart" height="140"></canvas></div>
+  <div class="chart-wrap"><div class="chart-lbl">Gennemsnitlig PF/sæson per manager</div><canvas id="pfChart" height="140"></canvas>
+    <div class="note" style="margin-top:8px">Igangværende sæson tæller med som en delvis sæson — nye/aktive managers' søjler viser deres pace indtil videre, ikke en fuld sæson.</div>
+  </div>
   <div class="sec-title">Komplet <span>Manager-statistik</span></div>
   <table><thead><tr><th>Manager</th><th>Sæsoner</th><th>W</th><th>L</th><th>Win%</th><th>PF/sæson</th><th>🏆</th><th>Finaler</th></tr></thead>
   <tbody id="fullstats-body"></tbody></table>
+</div>
+
+<!-- STAT HIGHLIGHTS -->
+<div class="section" id="section-stathighlights">
+  <div class="page-title">STAT HIGHLIGHTS</div>
+  <div class="page-sub">Rekorder og kuriositeter på tværs af alle sæsoner (kun regular season)</div>
+
+  <div class="sec-title">Højeste <span>Score i en Runde</span></div>
+  <table><thead><tr><th></th><th>Manager</th><th>Score</th><th>Hvornår</th><th>Resultat</th></tr></thead>
+  <tbody id="sh-high-scores"></tbody></table>
+
+  <div class="sec-title">Laveste <span>Score i en Runde</span></div>
+  <table><thead><tr><th></th><th>Manager</th><th>Score</th><th>Hvornår</th><th>Resultat</th></tr></thead>
+  <tbody id="sh-low-scores"></tbody></table>
+
+  <div class="sec-title">Længste <span>Sejrsstime</span></div>
+  <table><thead><tr><th></th><th>Manager</th><th>Kampe i træk</th><th>Periode</th></tr></thead>
+  <tbody id="sh-win-streaks"></tbody></table>
+
+  <div class="sec-title">Længste <span>Taberstime</span></div>
+  <table><thead><tr><th></th><th>Manager</th><th>Kampe i træk</th><th>Periode</th></tr></thead>
+  <tbody id="sh-loss-streaks"></tbody></table>
+
+  <div class="sec-title">Mest <span>Konsistente</span></div>
+  <div class="info-box">Lavest uge-til-uge udsving i score (min. 15 kampe) — samme niveau hver uge, for godt og ondt.</div>
+  <table><thead><tr><th></th><th>Manager</th><th>Std.afv.</th><th>Gns. score</th></tr></thead>
+  <tbody id="sh-consistent"></tbody></table>
+
+  <div class="sec-title">Boom <span>or Bust</span></div>
+  <div class="info-box">Højest uge-til-uge udsving (min. 15 kampe) — du ved aldrig hvad du får.</div>
+  <table><thead><tr><th></th><th>Manager</th><th>Std.afv.</th><th>Gns. score</th></tr></thead>
+  <tbody id="sh-volatile"></tbody></table>
 </div>
 
 <!-- MANAGERS -->
@@ -670,9 +705,9 @@ const MANAGERS_INFO={
 };
 
 // ── NAV ──
-const NAV_ORDER = ['overview','awards','alltime','managers','sleeper','powerrankings','playoffodds','newsletter','playoffs','toiletbowl','standings','matchups','h2h','draft','draftgrades','trades','about'];
+const NAV_ORDER = ['overview','awards','alltime','stathighlights','managers','sleeper','powerrankings','playoffodds','newsletter','playoffs','toiletbowl','standings','matchups','h2h','draft','draftgrades','trades','about'];
 const NAV_TITLES = {
-  overview:'Trophy Wall', awards:'Awards', alltime:'All-Time Stats', managers:'Managers',
+  overview:'Trophy Wall', awards:'Awards', alltime:'All-Time Stats', stathighlights:'Stat Highlights', managers:'Managers',
   sleeper:'Aktuel Sæson', powerrankings:'Power Rankings', playoffodds:'Playoff Odds',
   newsletter:'Newsletter',
   playoffs:'Playoff Resultater', toiletbowl:'Toilet Bowl', standings:'Regular Season',
@@ -680,14 +715,14 @@ const NAV_TITLES = {
   trades:'Trades', about:'Ligaen'
 };
 const NAV_ICONS = {
-  overview:'🏆', awards:'🥇', alltime:'📈', managers:'👤',
+  overview:'🏆', awards:'🥇', alltime:'📈', stathighlights:'⭐', managers:'👤',
   sleeper:'🟢', powerrankings:'📈', playoffodds:'🎲', newsletter:'📰',
   playoffs:'🏟️', toiletbowl:'🚽', standings:'📊',
   matchups:'⚡', h2h:'⚔️', draft:'📋', draftgrades:'🎯',
   trades:'🔄', about:'ℹ️'
 };
 const NAV_GROUPS = [
-  {label:'Overblik', items:['overview','awards','alltime','managers']},
+  {label:'Overblik', items:['overview','awards','alltime','stathighlights','managers']},
   {label:'💤 Live (Sleeper)', items:['sleeper','powerrankings','playoffodds','newsletter']},
   {label:'📚 Historik 2018–2025', items:['playoffs','toiletbowl','standings','matchups','h2h','draft','draftgrades','trades']},
   {label:'Info', items:['about']}
@@ -862,6 +897,117 @@ function computeAT(){
     }
   }
   return at;
+}
+
+// ── STAT HIGHLIGHTS (rekorder/kuriositeter) ──
+// Flad liste af hver holds score i hver spillet uge (begge sider af hver matchup).
+function computeAllWeekScores(includePlayoffs=false){
+  const rows = [];
+  for(const [yr, s] of Object.entries(RAW)){
+    for(const m of s.matchups){
+      if(!includePlayoffs && !isRegularWeek(yr, m.week)) continue;
+      rows.push({manager:m.m1, year:yr, week:m.week, score:m.s1, opp:m.m2, won:m.winner===m.m1});
+      rows.push({manager:m.m2, year:yr, week:m.week, score:m.s2, opp:m.m1, won:m.winner===m.m2});
+    }
+  }
+  return rows;
+}
+
+// Længste sejrs-/taberstime per manager, fundet ved at gå kronologisk (år, uge)
+// gennem deres kampe og tracke løbende streaks.
+function computeStreaks(includePlayoffs=false){
+  const byManager = {};
+  for(const [yr, s] of Object.entries(RAW)){
+    const yrNum = parseInt(yr);
+    for(const m of s.matchups){
+      if(!includePlayoffs && !isRegularWeek(yr, m.week)) continue;
+      [[m.m1, m.winner===m.m1], [m.m2, m.winner===m.m2]].forEach(([mgr,won])=>{
+        if(!byManager[mgr]) byManager[mgr]=[];
+        byManager[mgr].push({yr:yrNum, week:m.week, won});
+      });
+    }
+  }
+  const results = [];
+  for(const [mgr, games] of Object.entries(byManager)){
+    games.sort((a,b)=>a.yr-b.yr || a.week-b.week);
+    let curWin=0, curLoss=0, winStart=null, lossStart=null;
+    let bestWin={len:0}, bestLoss={len:0};
+    games.forEach(g=>{
+      if(g.won){
+        if(curWin===0) winStart=g;
+        curWin++; curLoss=0;
+        if(curWin>bestWin.len) bestWin={len:curWin, start:winStart, end:g};
+      } else {
+        if(curLoss===0) lossStart=g;
+        curLoss++; curWin=0;
+        if(curLoss>bestLoss.len) bestLoss={len:curLoss, start:lossStart, end:g};
+      }
+    });
+    results.push({manager:mgr, bestWin, bestLoss, games});
+  }
+  return results;
+}
+
+// Std.afvigelse af ugentlige scores per manager — bruges til "Mest Konsistente" / "Boom or Bust".
+function computeVolatility(includePlayoffs=false, minGames=15){
+  const byManager = {};
+  computeAllWeekScores(includePlayoffs).forEach(r=>{
+    (byManager[r.manager] = byManager[r.manager]||[]).push(r.score);
+  });
+  return Object.entries(byManager)
+    .filter(([m,scores])=>scores.length>=minGames)
+    .map(([m,scores])=>{
+      const mean = scores.reduce((a,b)=>a+b,0)/scores.length;
+      const variance = scores.reduce((a,b)=>a+(b-mean)**2,0)/scores.length;
+      return {manager:m, stdev:Math.sqrt(variance), mean, games:scores.length};
+    });
+}
+
+function renderStatHighlights(){
+  const weekRows = computeAllWeekScores(false);
+  const topHigh = [...weekRows].sort((a,b)=>b.score-a.score).slice(0,10);
+  const topLow = [...weekRows].filter(r=>r.score>0).sort((a,b)=>a.score-b.score).slice(0,10);
+
+  const scoreRow = (color) => (r,i) => `<tr>
+    <td>${rb(i+1)}</td>
+    <td>${mgrSpan(r.manager)}</td>
+    <td class="pf" style="color:${color};font-weight:700">${r.score.toFixed(2)}</td>
+    <td style="color:var(--muted)">${r.year}, uge ${r.week}</td>
+    <td style="color:var(--muted)">${r.won?'Vandt':'Tabte'} vs ${mgrSpan(r.opp)}</td>
+  </tr>`;
+  document.getElementById('sh-high-scores').innerHTML = topHigh.map(scoreRow('var(--green)')).join('');
+  document.getElementById('sh-low-scores').innerHTML = topLow.map(scoreRow('var(--red)')).join('');
+
+  const streaks = computeStreaks(false);
+  const topWinStreaks = [...streaks].filter(s=>s.bestWin.len>1).sort((a,b)=>b.bestWin.len-a.bestWin.len).slice(0,10);
+  const topLossStreaks = [...streaks].filter(s=>s.bestLoss.len>1).sort((a,b)=>b.bestLoss.len-a.bestLoss.len).slice(0,10);
+
+  const streakSpan = d => d.start.yr===d.end.yr
+    ? `${d.start.yr}, uge ${d.start.week}–${d.end.week}`
+    : `${d.start.yr} uge ${d.start.week} → ${d.end.yr} uge ${d.end.week}`;
+  const streakRow = (key,color) => (s,i) => {
+    const d = s[key];
+    return `<tr>
+      <td>${rb(i+1)}</td>
+      <td>${mgrSpan(s.manager)}</td>
+      <td class="pf" style="color:${color};font-weight:700">${d.len}</td>
+      <td style="color:var(--muted)">${streakSpan(d)}</td>
+    </tr>`;
+  };
+  document.getElementById('sh-win-streaks').innerHTML = topWinStreaks.map(streakRow('bestWin','var(--green)')).join('');
+  document.getElementById('sh-loss-streaks').innerHTML = topLossStreaks.map(streakRow('bestLoss','var(--red)')).join('');
+
+  const vol = computeVolatility(false, 15);
+  const consistent = [...vol].sort((a,b)=>a.stdev-b.stdev).slice(0,10);
+  const volatile = [...vol].sort((a,b)=>b.stdev-a.stdev).slice(0,10);
+  const volRow = (v,i) => `<tr>
+    <td>${rb(i+1)}</td>
+    <td>${mgrSpan(v.manager)}</td>
+    <td class="pf" style="font-weight:700">${v.stdev.toFixed(1)}</td>
+    <td style="color:var(--muted)">${v.mean.toFixed(1)} (${v.games} kampe)</td>
+  </tr>`;
+  document.getElementById('sh-consistent').innerHTML = consistent.map(volRow).join('');
+  document.getElementById('sh-volatile').innerHTML = volatile.map(volRow).join('');
 }
 
 // ── COMPUTE H2H ──
@@ -1047,12 +1193,17 @@ function renderAllTime(){
   const mgrs=sorted.map(([m])=>m);
   const avgs=sorted.map(([m,s])=>s.pf>0?(s.pf/s.seasons).toFixed(1):0);
   const colors=mgrs.map(m=>MGR_COLORS[m]||'#888');
+  // Dynamisk akse-bund i stedet for et hardcodet tal — ellers forsvinder søjler for
+  // managers med en igangværende/delvis sæson (lavere sum end en fuld sæsons total).
+  const numericAvgs = avgs.map(Number).filter(v=>v>0);
+  const dataMin = numericAvgs.length ? Math.min(...numericAvgs) : 0;
+  const yMin = Math.max(0, Math.floor((dataMin-100)/100)*100);
   if(pfChart)pfChart.destroy();
   pfChart=new Chart(document.getElementById('pfChart').getContext('2d'),{
     type:'bar',
     data:{labels:mgrs,datasets:[{data:avgs,backgroundColor:colors.map(c=>c+'99'),borderColor:colors,borderWidth:2}]},
     options:{responsive:true,plugins:{legend:{display:false}},scales:{
-      y:{beginAtZero:false,min:1400,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#6B7A8D'}},
+      y:{beginAtZero:false,min:yMin,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#6B7A8D'}},
       x:{grid:{display:false},ticks:{color:'#9BA3AF'}}
     }}
   });
@@ -1983,28 +2134,27 @@ async function renderSleeper() {
     });
     html += '</tbody></table>';
 
-    // Draft (hvis afholdt)
+    // Kampe spillet denne sæson, nyeste uge øverst (se Draft-fanen for draft-picks)
     try {
-      const drafts = await fetchSleeper(`/league/${SLEEPER_LEAGUE_ID}/drafts`);
-      if (drafts && drafts.length > 0 && drafts[0].status !== 'pre_draft') {
-        const picks = await fetchSleeper(`/draft/${drafts[0].draft_id}/picks`);
-        const r1picks = picks.filter(p => p.round === 1).sort((a,b) => a.pick_no - b.pick_no);
-        if (r1picks.length > 0) {
-          html += `<div class="sec-title">Draft <span>Runde 1 — ${season}</span></div>`;
-          html += `<div class="draft-grid">` + r1picks.map(p => {
-            const mgr = resolveManager(userMap[p.picked_by] || p.picked_by || '?');
-            const playerName = p.metadata?.first_name ? `${p.metadata.first_name} ${p.metadata.last_name}` : (p.metadata?.player_id || 'Ukendt');
-            const pos = p.metadata?.position || '?';
-            return `<div class="pick-card">
-              <div class="pk-num">Pick ${p.pick_no} · Runde 1</div>
-              <div class="pk-pl">${playerName}</div>
-              <div><span class="pos-tag pos-${pos}">${pos}</span></div>
-              <div class="pk-mgr">→ ${mgrSpan(mgr)}</div>
-            </div>`;
-          }).join('') + `</div>`;
+      const nflState = await fetchSleeper('/state/nfl');
+      const maxWeek = Math.max(0, (nflState?.week || 1) - 1);
+      if (maxWeek >= 1) {
+        const rosterIdToManager = {};
+        rosters.forEach(r => { rosterIdToManager[r.roster_id] = userMap[r.owner_id] || `Roster${r.roster_id}`; });
+        const liveMatchups = await buildLiveMatchups(rosterIdToManager, maxWeek);
+        if (liveMatchups.length > 0) {
+          html += `<div class="sec-title">Kampe <span>${season}</span></div>`;
+          for (let wk = maxWeek; wk >= 1; wk--) {
+            const wkGames = liveMatchups.filter(m => m.week === wk);
+            if (wkGames.length === 0) continue;
+            html += `<div style="font-size:12px;font-weight:700;color:var(--muted);margin:16px 0 6px">${weekLabel(season, wk)}</div>`;
+            html += `<table><thead><tr><th></th><th>Hold 1</th><th>Score</th><th></th><th>Score</th><th>Hold 2</th><th>Margin</th></tr></thead><tbody>`;
+            html += wkGames.map(m => gameRow({...m, year: season}, false)).join('');
+            html += `</tbody></table>`;
+          }
         }
       }
-    } catch(draftErr) { /* draft ikke tilgængeligt endnu, ignorer stille */ }
+    } catch(muErr) { /* kampe ikke tilgængelige endnu, ignorer stille */ }
 
     html += `<p class="note" style="margin-top:8px">Data hentet live fra Sleeper API ved hvert besøg på denne fane.</p>`;
     el.innerHTML = html;
@@ -2073,6 +2223,12 @@ function renderManagerProfile(name){
   const h2h = computeH2H()[name] || {};
   const h2hRows = Object.entries(h2h).map(([opp,r])=>({opp, ...r, pct: r.w+r.l>0?r.w/(r.w+r.l):0})).sort((a,b)=>b.pct-a.pct);
 
+  // Personlige rekorder: bedste/værste uge og længste sejrs-/taberstime
+  const myWeeks = computeAllWeekScores(false).filter(r=>r.manager===name);
+  const bestWeek = myWeeks.length ? [...myWeeks].sort((a,b)=>b.score-a.score)[0] : null;
+  const worstWeek = myWeeks.length ? [...myWeeks].sort((a,b)=>a.score-b.score)[0] : null;
+  const myStreaks = computeStreaks(false).find(s=>s.manager===name);
+
   const timeline = Object.keys(RAW).sort().reverse().map(yr=>{
     const st = RAW[yr].standings.find(s=>s.manager===name);
     if(!st) return null;
@@ -2110,6 +2266,19 @@ function renderManagerProfile(name){
     </tr>`).join('')}
     </tbody></table>
   `;
+
+  if(bestWeek || myStreaks){
+    const streakSpanMgr = d => d.start.yr===d.end.yr
+      ? `${d.start.yr}, uge ${d.start.week}–${d.end.week}`
+      : `${d.start.yr} uge ${d.start.week} → ${d.end.yr} uge ${d.end.week}`;
+    html += `<div class="sec-title">Personlige <span>Rekorder</span></div>
+    <div class="stat-grid">
+      ${bestWeek?`<div class="stat-card"><div class="lbl">Bedste uge</div><div class="val" style="color:var(--green)">${bestWeek.score.toFixed(1)}</div><div class="sub">${bestWeek.year}, uge ${bestWeek.week} — ${bestWeek.won?'vandt':'tabte stadig'} vs ${bestWeek.opp}</div></div>`:''}
+      ${worstWeek?`<div class="stat-card"><div class="lbl">Værste uge</div><div class="val" style="color:var(--red)">${worstWeek.score.toFixed(1)}</div><div class="sub">${worstWeek.year}, uge ${worstWeek.week} — ${worstWeek.won?'vandt alligevel':'tabte'} vs ${worstWeek.opp}</div></div>`:''}
+      ${myStreaks&&myStreaks.bestWin.len>0?`<div class="stat-card"><div class="lbl">Længste sejrsstime</div><div class="val" style="color:var(--green)">${myStreaks.bestWin.len}</div><div class="sub">${streakSpanMgr(myStreaks.bestWin)}</div></div>`:''}
+      ${myStreaks&&myStreaks.bestLoss.len>0?`<div class="stat-card"><div class="lbl">Længste taberstime</div><div class="val" style="color:var(--red)">${myStreaks.bestLoss.len}</div><div class="sub">${streakSpanMgr(myStreaks.bestLoss)}</div></div>`:''}
+    </div>`;
+  }
 
   if(picks.length){
     html += `<div class="sec-title">Draft <span>Performance</span></div>
@@ -2863,6 +3032,7 @@ function renderAll(){
   renderOverview();
   renderAwards();
   renderAllTime();
+  renderStatHighlights();
   renderPlayoffs();
   renderStandings();
   renderMatchups();
