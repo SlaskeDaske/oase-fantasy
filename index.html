@@ -2141,15 +2141,29 @@ async function renderSleeper() {
       if (maxWeek >= 1) {
         const rosterIdToManager = {};
         rosters.forEach(r => { rosterIdToManager[r.roster_id] = userMap[r.owner_id] || `Roster${r.roster_id}`; });
+        // Holdnavn er IKKE det samme som manager — Sleeper lader hver manager navngive
+        // sit eget hold, så vi slår det rigtige holdnavn op pr. manager (samme kilde som Standings ovenfor).
+        const teamNameByManager = {};
+        standings.forEach(s => { teamNameByManager[s.manager] = s.teamName; });
         const liveMatchups = await buildLiveMatchups(rosterIdToManager, maxWeek);
         if (liveMatchups.length > 0) {
           html += `<div class="sec-title">Kampe <span>${season}</span></div>`;
+          const teamCell = mgr => `<div class="tn">${teamNameByManager[mgr]||mgr}</div><div style="font-size:11px">${mgrSpan(mgr)}</div>`;
+          const liveGameRow = m => `<tr>
+            <td style="color:var(--muted);font-size:12px">${weekLabel(season, m.week)}</td>
+            <td>${teamCell(m.m1)}</td>
+            <td class="pf" style="${m.winner===m.m1?'color:var(--green);font-weight:700':''}">${m.s1.toFixed(2)}</td>
+            <td style="color:var(--muted)">vs</td>
+            <td class="pf" style="${m.winner===m.m2?'color:var(--green);font-weight:700':''}">${m.s2.toFixed(2)}</td>
+            <td>${teamCell(m.m2)}</td>
+            <td style="color:var(--muted);font-size:12px">±${m.margin.toFixed(2)}</td>
+          </tr>`;
           for (let wk = maxWeek; wk >= 1; wk--) {
             const wkGames = liveMatchups.filter(m => m.week === wk);
             if (wkGames.length === 0) continue;
             html += `<div style="font-size:12px;font-weight:700;color:var(--muted);margin:16px 0 6px">${weekLabel(season, wk)}</div>`;
             html += `<table><thead><tr><th></th><th>Hold 1</th><th>Score</th><th></th><th>Score</th><th>Hold 2</th><th>Margin</th></tr></thead><tbody>`;
-            html += wkGames.map(m => gameRow({...m, year: season}, false)).join('');
+            html += wkGames.map(liveGameRow).join('');
             html += `</tbody></table>`;
           }
         }
