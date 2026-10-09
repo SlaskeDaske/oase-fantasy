@@ -137,6 +137,12 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .nl-body p{margin-bottom:12px}
 .nl-body p:last-child{margin-bottom:0}
 .nl-meta{font-size:11px;color:var(--muted);margin-top:18px;padding-top:12px;border-top:1px solid var(--border)}
+.nl-history{margin-top:4px}
+.nl-history summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--muted);padding:10px 4px;list-style:none;display:flex;align-items:center;gap:6px}
+.nl-history summary::before{content:'▸';transition:transform .15s}
+.nl-history[open] summary::before{transform:rotate(90deg)}
+.nl-issue-old{opacity:0.85}
+.nl-sep{border:none;border-top:1px dashed var(--border);margin:8px 0 20px}
 .cmc-n{font-family:'Bebas Neue',sans-serif;font-size:56px;color:var(--green);line-height:1}
 .cmc-t h3{font-size:14px;font-weight:700;margin-bottom:3px}
 .cmc-t p{font-size:12px;color:var(--muted);line-height:1.5}
@@ -1221,6 +1227,11 @@ function renderMatchups(){
 }
 
 function isRegularWeek(year, week){
+  // Brug det faktiske liga-format fra Sleeper for den aktive sæson (slutspil kan
+  // starte på forskellige uger afhængigt af antal hold/slutspilspladser i den pågældende sæson).
+  if(LIVE_SEASON_YEAR && String(year)===String(LIVE_SEASON_YEAR) && LIVE_PLAYOFF_WEEK_START){
+    return week <= LIVE_PLAYOFF_WEEK_START-1;
+  }
   const maxWk = parseInt(year)>=2021 ? 15 : 14;
   return week <= maxWk;
 }
@@ -2359,6 +2370,8 @@ async function buildLivePlayoffData(rosterIdToManager){
 
 let LIVE_SEASON_YEAR = null;
 let FUTURE_SCHEDULE = {}; // year -> [{week, m1, m2}] — kendt kampplan for ikke-spillede uger
+let LIVE_PLAYOFF_TEAMS = null; // antal hold der går i slutspil i den aktive sæson (fra Sleeper league.settings)
+let LIVE_PLAYOFF_WEEK_START = null; // første slutspils-uge i den aktive sæson (fra Sleeper league.settings)
 
 async function mergeLiveSeason(){
   try{
@@ -2367,6 +2380,12 @@ async function mergeLiveSeason(){
     const status = league.status;
     if(RAW[season]) return; // allerede del af den verificerede historik
     if(status==='pre_draft') return; // intet at hente endnu
+
+    // Hent det faktiske liga-format fra Sleeper, i stedet for at hardcode det —
+    // undgår at Playoff Odds og regulær-sæson-beregninger drifter væk fra virkeligheden
+    // hvis liga-formatet ændres (f.eks. flere hold eller flere slutspilspladser).
+    LIVE_PLAYOFF_TEAMS = league.settings?.playoff_teams || null;
+    LIVE_PLAYOFF_WEEK_START = league.settings?.playoff_week_start || null;
 
     const [rosters, users] = await Promise.all([
       fetchSleeper(`/league/${SLEEPER_LEAGUE_ID}/rosters`),
@@ -2397,7 +2416,8 @@ async function mergeLiveSeason(){
 
     // Hent kendt kampplan for resten af regular season (til Playoff-sandsynligheder)
     try{
-      const futureSched = await buildFutureSchedule(rosterIdToManager, maxWeek+1, 15);
+      const lastRegWeek = (LIVE_PLAYOFF_WEEK_START ? LIVE_PLAYOFF_WEEK_START-1 : 15);
+      const futureSched = await buildFutureSchedule(rosterIdToManager, maxWeek+1, lastRegWeek);
       if(futureSched.length>0) FUTURE_SCHEDULE[season] = futureSched;
     }catch(e){ /* nice-to-have, fejler stille */ }
 
@@ -2542,7 +2562,11 @@ function simulatePlayoffOdds(year, numSims=2000){
   const s = RAW[year];
   if(!s) return null;
   const futureSched = FUTURE_SCHEDULE[year] || [];
-  const playoffSpots = 4;
+  // Hent antal slutspilspladser fra ligaens faktiske indstillinger i stedet for at hardcode det —
+  // jeres liga bruger 6 pladser (bye week til sæde 1-2), men dette kan ændre sig i fremtiden.
+  const playoffSpots = (LIVE_SEASON_YEAR && String(year)===String(LIVE_SEASON_YEAR) && LIVE_PLAYOFF_TEAMS)
+    ? LIVE_PLAYOFF_TEAMS
+    : (s.numTeams >= 10 ? 6 : 4);
 
   const scoresByManager = {};
   s.matchups.forEach(m=>{
@@ -2633,22 +2657,10 @@ async function renderNewsletter(){
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-  try{
-    const res = await fetch('newsletter.json?t=' + Date.now(), { signal: controller.signal, cache: 'no-store' });
-    clearTimeout(timeoutId);
-    if(!res.ok) throw new Error('ikke fundet');
-    const nl = await res.json();
+  const issueHtml = (nl, isLatest) => {
     const when = nl.generated ? new Date(nl.generated).toLocaleString('da-DK',
       {day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
-
-    el.innerHTML = `
-      <div class="nl-card preview">
-        <div class="nl-head">
-          <div class="nl-title">🔮 Optakt</div>
-          <div class="nl-week">Uge ${nl.previewWeek} · ${nl.season}</div>
-        </div>
-        <div class="nl-body">${toParagraphs(nl.preview)}</div>
-      </div>
+    return `
       <div class="nl-card recap">
         <div class="nl-head">
           <div class="nl-title">📋 Opsamling</div>
@@ -2656,7 +2668,34 @@ async function renderNewsletter(){
         </div>
         <div class="nl-body">${toParagraphs(nl.recap)}</div>
       </div>
-      <div class="nl-meta">Skrevet af Gemini ud fra ligaens faktiske data · senest opdateret ${when} · genereres automatisk hver tirsdag morgen</div>`;
+      <div class="nl-card preview">
+        <div class="nl-head">
+          <div class="nl-title">🔮 Optakt</div>
+          <div class="nl-week">Uge ${nl.previewWeek} · ${nl.season}</div>
+        </div>
+        <div class="nl-body">${toParagraphs(nl.preview)}</div>
+      </div>
+      <div class="nl-meta">Skrevet af Gemini ud fra ligaens faktiske data · ${isLatest ? `senest opdateret ${when} · genereres automatisk hver tirsdag morgen` : `genereret ${when}`}</div>`;
+  };
+
+  try{
+    const res = await fetch('newsletter.json?t=' + Date.now(), { signal: controller.signal, cache: 'no-store' });
+    clearTimeout(timeoutId);
+    if(!res.ok) throw new Error('ikke fundet');
+    const data = await res.json();
+    // Bagudkompatibel: ældre newsletter.json-filer er en enkelt udgave uden "issues"-array.
+    const issues = Array.isArray(data.issues) ? data.issues : (data.preview ? [data] : []);
+    if(issues.length===0) throw new Error('ingen udgaver');
+
+    const [latest, ...older] = issues;
+    let html = `<div class="nl-issue">${issueHtml(latest, true)}</div>`;
+    if(older.length>0){
+      html += `<details class="nl-history">
+        <summary>Se ${older.length} tidligere ${older.length===1?'udgave':'udgaver'}</summary>
+        ${older.map(nl=>`<div class="nl-issue nl-issue-old">${issueHtml(nl, false)}</div>`).join('<hr class="nl-sep">')}
+      </details>`;
+    }
+    el.innerHTML = html;
     newsletterLoaded = true; // kun markér som hentet ved succes, så et nyt besøg kan prøve igen ved fejl
   }catch(e){
     clearTimeout(timeoutId);
