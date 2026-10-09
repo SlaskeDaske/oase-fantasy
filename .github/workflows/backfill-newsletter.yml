@@ -3,6 +3,9 @@ name: Genskab tidligere nyhedsbreve (engangs)
 on:
   workflow_dispatch: {}
 
+permissions:
+  contents: write
+
 jobs:
   backfill:
     runs-on: ubuntu-latest
