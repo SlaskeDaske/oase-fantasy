@@ -1,6 +1,15 @@
 {
   "issues": [
     {
+      "generated": "2026-10-09T11:13:29.115180+00:00",
+      "season": "2026",
+      "previewWeek": 5,
+      "recapWeek": 4,
+      "preview": "Efter fjerde spillerunde i Oase NFL Fantasy League tegner der sig et usædvanligt billede af tabellen. Roal indtager en isoleret førsteplads med en fejlfri statistik på 4-0, mens hele syv hold følger efter med rekorden 2-2. Blandt disse findes debutanterne Christian og Alexander, der trods deres manglende historik i ligaen har formået at bide skeer med de etablerede kræfter. Uge 5 byder på flere bemærkelsesværdige opgør, herunder to førstegangsmøder, hvor debutanterne skal testes mod tidligere mestre. Jonas, der vandt titlen i 2020, står over for Christian, mens Simon skal forsøge at dæmme op for Alexander.\n\nRundens mest interessante kamp findes dog i opgøret mellem Jesper og Lasse. Begge managere har tidligere vundet ligaen, men den indbyrdes statistik taler et tydeligt sprog. Siden 2018 har de mødtes 15 gange, og her fører Lasse overbevisende med 10 sejre mod Jespers 5. Lasse kommer desuden ind til ugen med momentum efter at have præsteret rundens højeste score på 161.22 point i uge 4. Den statistiske tendens peger på en fordel til Lasse, men Jespers historik som dobbelt mester gør opgøret vanskeligt at forudsige entydigt. Den nuværende tæthed i midterfeltet betyder, at resultaterne i denne uge sandsynligvis vil skabe den første reelle separation i tabellen frem mod grundspillets midterfase.",
+      "recap": "Efter fjerde spillerunde i Oase NFL Fantasy League står Roal som den eneste ubesejrede manager med en statistik på 4-0. Dette blev sikret via en sejr på 131,46 mod 118,94 over debutanten Christian. Resultatet placerer Christian i en statistisk uheldig position; på trods af ligaens højeste antal point for (579,84), indtager han nu andenpladsen med en rekord på 2-2. Denne uges mest markante præstation stod Lasse for, da han med 161,22 point besejrede Simon og dermed leverede rundens højeste score. I den modsatte ende af skalaen findes Jesper, der med 102,64 point præsterede ugens laveste total i sit nederlag til Thomas. Det er bemærkelsesværdigt, at Jesper trods rundens bundniveau fortsat holder en tredjeplads i den samlede stilling grundet et lavt antal point imod sig over sæsonens første fire uger. Kasper og Tobias hentede vigtige sejre for at holde trit med midterfeltet, hvor hele syv managere nu står noteret for statistikken 2-2. For den tidligere mester Jonas ser situationen mere alvorlig ud, da nederlaget til Kasper efterlader ham på sidstepladsen med en rekord på 1-3 og ligaens højeste antal point imod sig. Konsistensen i ligaen er pt. fraværende for de fleste, hvilket de mange jævnbyrdige rekorder i tabellen afspejler.",
+      "model": "gemini-3-flash-preview"
+    },
+    {
       "generated": "2026-10-09T11:12:50.143703+00:00",
       "season": "2026",
       "previewWeek": 4,
