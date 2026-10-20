@@ -1,6 +1,15 @@
 {
   "issues": [
     {
+      "generated": "2026-10-20T12:39:28.565114+00:00",
+      "season": "2026",
+      "previewWeek": 7,
+      "recapWeek": 6,
+      "preview": "Efter seks spillerunder i Oase NFL Fantasy League tegner der sig et tydeligt billede af en sæson præget af både historisk stabilitet og nye aktører. Roal topper tabellen som ubesejret med seks sejre, mens de to debutanter, Christian og Alexander, har markeret sig i hver sin ende af slutspilsfeltet. Christian indtager aktuelt andenpladsen og har ligaens højeste antal point scoret med 887,12, hvilket understreger en effektiv offensiv tilgang i hans første sæson.\n\nUge 7 byder på flere interessante konfrontationer, men mest bemærkelsesværdigt er opgøret mellem Roal og Simon. De to managere har mødt hinanden 12 gange siden 2018, og den indbyrdes statistik står helt lige med seks sejre til hver. Simon har efter nederlaget til Jesper i uge 6 brug for en sejr for at holde trit med midterfeltet, men han står over for en statistisk set vanskelig opgave mod ligaens duks. Samtidig skal den dobbelte mester Jesper for første gang nogensinde måle sig med Alexander, mens Christian og Kasper ligeledes mødes i et jomfrueligt opgør mellem tabellens nummer to og fire.\n\nAnalytisk set er ligaen knækket midt over. Mens topholdene vinder deres kampe relativt sikkert, kæmper fem hold i bunden med blot to sejre hver. Tobias befinder sig i en kritisk position på sidstepladsen, og hans kommende kamp mod Thomas er en statistisk nødvendighed at vinde, hvis han skal gøre sig forhåbninger om at avancere. Det er værd at bemærke, at Thomas endnu aldrig har slået Tobias i ligaens historie, hvilket giver sidstnævnte et spinkelt mentalt overtag i en ellers udfordret sæson.",
+      "recap": "Efter sjette spillerunde i Oase NFL Fantasy League står Roal fortsat som ligaens eneste ubesejrede manager med en rekord på 6-0 efter en sejr på 120,72 mod 103,84 over Lasse. Selvom Roal fører tabellen, er det debutanten Christian, der indtager rollen som ligaens mest potente offensiv med 887,12 point for sæsonen. Christian leverede ligeledes ugens statistisk set stærkeste præstation ved at besejre Tobias med 138,80 point. Tobias må i denne sammenhæng noteres for ugens mest uheldige resultat, da hans score på 117,02 point var højere end fire af ugens vindere, men alligevel resulterede i et nederlag og en placering i bunden af rækken.\n\nI den modsatte ende af skalaen leverede Alexander ugens svageste indsats med blot 72,80 point i sit nederlag til Kasper. Også Simon havde en svær uge og præsterede med 83,10 point ligaens næstlaveste score mod den dobbelte mester Jesper, der med sin sejr rykker op på en delt andenplads. Midterfeltet er tæt, hvor fem managere aktuelt står noteret for to sejre, herunder Jonas der med en sejr over Thomas holdt liv i sine slutspilsambitioner. Historikken vægter tungt i ligaen, men med to debutanter i top fem er det etablerede hierarki under pres forud for syvende spillerunde.",
+      "model": "gemini-3-flash-preview"
+    },
+    {
       "generated": "2026-10-13T14:55:59.071894+00:00",
       "season": "2026",
       "previewWeek": 6,
