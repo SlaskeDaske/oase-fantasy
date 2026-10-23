@@ -1,0 +1,265 @@
+{
+ "generated": "2026-10-23T07:39:01.335670+00:00",
+ "season": "2026",
+ "weeks": {
+  "1": {
+   "games": [
+    {
+     "m1": "Jesper",
+     "s1": 145.46,
+     "m2": "Tobias",
+     "s2": 105.1
+    },
+    {
+     "m1": "Lasse",
+     "s1": 120.16,
+     "m2": "Christian",
+     "s2": 156.86
+    },
+    {
+     "m1": "Thomas",
+     "s1": 88.0,
+     "m2": "Alexander",
+     "s2": 156.86
+    },
+    {
+     "m1": "Roal",
+     "s1": 147.54,
+     "m2": "Jonas",
+     "s2": 109.42
+    },
+    {
+     "m1": "Simon",
+     "s1": 103.26,
+     "m2": "Kasper",
+     "s2": 129.92
+    }
+   ],
+   "hats": []
+  },
+  "2": {
+   "games": [
+    {
+     "m1": "Jesper",
+     "s1": 117.98,
+     "m2": "Kasper",
+     "s2": 46.12
+    },
+    {
+     "m1": "Lasse",
+     "s1": 79.28,
+     "m2": "Thomas",
+     "s2": 141.48
+    },
+    {
+     "m1": "Tobias",
+     "s1": 116.04,
+     "m2": "Roal",
+     "s2": 135.6
+    },
+    {
+     "m1": "Simon",
+     "s1": 150.2,
+     "m2": "Christian",
+     "s2": 141.22
+    },
+    {
+     "m1": "Jonas",
+     "s1": 110.76,
+     "m2": "Alexander",
+     "s2": 142.92
+    }
+   ],
+   "hats": [
+    {
+     "manager": "Kasper",
+     "player": "Puka Nacua",
+     "pos": "WR",
+     "nfl": "LAR",
+     "status": "INA",
+     "points": 0
+    },
+    {
+     "manager": "Kasper",
+     "player": "Michael Pittman Jr.",
+     "pos": "WR",
+     "nfl": "PIT",
+     "status": "INA",
+     "points": 0
+    }
+   ]
+  },
+  "3": {
+   "games": [
+    {
+     "m1": "Jesper",
+     "s1": 162.5,
+     "m2": "Christian",
+     "s2": 162.82
+    },
+    {
+     "m1": "Lasse",
+     "s1": 146.08,
+     "m2": "Alexander",
+     "s2": 100.76
+    },
+    {
+     "m1": "Thomas",
+     "s1": 107.34,
+     "m2": "Simon",
+     "s2": 107.54
+    },
+    {
+     "m1": "Tobias",
+     "s1": 119.24,
+     "m2": "Jonas",
+     "s2": 135.58
+    },
+    {
+     "m1": "Roal",
+     "s1": 114.08,
+     "m2": "Kasper",
+     "s2": 68.06
+    }
+   ],
+   "hats": [
+    {
+     "manager": "Kasper",
+     "player": "Puka Nacua",
+     "pos": "WR",
+     "nfl": "LAR",
+     "status": "INA",
+     "points": 0
+    }
+   ]
+  },
+  "4": {
+   "games": [
+    {
+     "m1": "Jesper",
+     "s1": 102.64,
+     "m2": "Thomas",
+     "s2": 110.5
+    },
+    {
+     "m1": "Lasse",
+     "s1": 161.22,
+     "m2": "Simon",
+     "s2": 123.58
+    },
+    {
+     "m1": "Tobias",
+     "s1": 146.3,
+     "m2": "Alexander",
+     "s2": 108.62
+    },
+    {
+     "m1": "Roal",
+     "s1": 131.46,
+     "m2": "Christian",
+     "s2": 118.94
+    },
+    {
+     "m1": "Jonas",
+     "s1": 106.02,
+     "m2": "Kasper",
+     "s2": 140.38
+    }
+   ],
+   "hats": []
+  },
+  "5": {
+   "games": [
+    {
+     "m1": "Jesper",
+     "s1": 114.84,
+     "m2": "Lasse",
+     "s2": 111.2
+    },
+    {
+     "m1": "Thomas",
+     "s1": 121.82,
+     "m2": "Roal",
+     "s2": 133.42
+    },
+    {
+     "m1": "Tobias",
+     "s1": 91.14,
+     "m2": "Kasper",
+     "s2": 167.44
+    },
+    {
+     "m1": "Simon",
+     "s1": 104.36,
+     "m2": "Alexander",
+     "s2": 158.6
+    },
+    {
+     "m1": "Jonas",
+     "s1": 137.36,
+     "m2": "Christian",
+     "s2": 168.48
+    }
+   ],
+   "hats": [
+    {
+     "manager": "Jonas",
+     "player": "Kyle Monangai",
+     "pos": "RB",
+     "nfl": "CHI",
+     "status": "INA",
+     "points": 0
+    }
+   ]
+  },
+  "6": {
+   "games": [
+    {
+     "m1": "Jesper",
+     "s1": 139.26,
+     "m2": "Simon",
+     "s2": 83.1
+    },
+    {
+     "m1": "Lasse",
+     "s1": 103.84,
+     "m2": "Roal",
+     "s2": 120.72
+    },
+    {
+     "m1": "Thomas",
+     "s1": 90.78,
+     "m2": "Jonas",
+     "s2": 105.86
+    },
+    {
+     "m1": "Tobias",
+     "s1": 117.02,
+     "m2": "Christian",
+     "s2": 138.8
+    },
+    {
+     "m1": "Kasper",
+     "s1": 115.8,
+     "m2": "Alexander",
+     "s2": 72.8
+    }
+   ],
+   "hats": [
+    {
+     "manager": "Simon",
+     "player": "Tyler Warren",
+     "pos": "TE",
+     "nfl": "IND",
+     "status": "INA",
+     "points": 0
+    }
+   ]
+  }
+ },
+ "live": {
+  "week": 7,
+  "flagged": [],
+  "doubtful": []
+ }
+}
