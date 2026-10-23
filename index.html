@@ -2123,19 +2123,21 @@ async function hatSectionHtml(){
   });
   html += `</tbody></table>`;
 
-  // Seneste uger: hvem var Hat
+  // Hat-spillere pr. uge: én samlet tabel, nyeste uge øverst, så kolonnerne flugter
   const weeks = Object.keys(HATS.weeks).map(Number).sort((a,b)=>b-a);
   html += `<div style="font-size:12px;font-weight:700;color:var(--muted);margin:18px 0 6px">Hat-spillere pr. uge</div>`;
+  html += `<table><thead><tr><th>Uge</th><th>Manager</th><th>Spiller</th><th>Status</th></tr></thead><tbody>`;
   weeks.forEach(wk=>{
     const hats = HATS.weeks[wk].hats || [];
-    html += `<details style="margin-bottom:6px"${wk===weeks[0]?' open':''}><summary style="cursor:pointer;font-size:13px">Uge ${wk} — ${hats.length?hats.length+' Hat-spiller'+(hats.length>1?'e':''):'ingen Hats 🎉'}</summary>`;
-    if(hats.length){
-      html += `<table><thead><tr><th>Manager</th><th>Spiller</th><th>Status</th><th>Point</th></tr></thead><tbody>` +
-        hats.map(h=>`<tr><td>${mgrSpan(h.manager)}</td><td>${hatEsc(h.player)} <span style="color:var(--muted);font-size:11px">${hatEsc(h.pos)} · ${hatEsc(h.nfl)}</span></td><td>${hatStatus(h.status)}</td><td class="pf">${Number(h.points||0).toFixed(1)}</td></tr>`).join('') +
-        `</tbody></table>`;
+    if(!hats.length){
+      html += `<tr><td style="color:var(--muted)">${wk}</td><td colspan="3" style="color:var(--muted)">Ingen Hats 🎉</td></tr>`;
+      return;
     }
-    html += `</details>`;
+    hats.forEach((h,i)=>{
+      html += `<tr><td style="color:var(--muted)">${i===0?wk:''}</td><td>${mgrSpan(h.manager)}</td><td>${hatEsc(h.player)} <span style="color:var(--muted);font-size:11px">${hatEsc(h.pos)} · ${hatEsc(h.nfl)}</span></td><td>${hatStatus(h.status)}</td></tr>`;
+    });
   });
+  html += `</tbody></table>`;
   return html;
 }
 
