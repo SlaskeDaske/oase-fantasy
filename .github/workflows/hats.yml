@@ -1,0 +1,42 @@
+name: Hat-opdatering
+
+# Opdaterer hats.json:
+#  - tirsdag morgen: færdiggør ugen der lige er spillet
+#  - søndag morgen og eftermiddag: live Hat-advarsel (Out/IR/inaktive starters)
+on:
+  schedule:
+    - cron: '0 6 * * 2'
+    - cron: '0 7 * * 0'
+    - cron: '30 15 * * 0'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: hats
+  cancel-in-progress: false
+
+jobs:
+  hats:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Generér Hat-data
+        env:
+          PYTHONUNBUFFERED: '1'
+        run: python scripts/generate_hats.py
+      - name: Commit hvis der er ændringer
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [ -n "$(git status --porcelain hats.json)" ]; then
+            git add hats.json
+            git commit -m "Hat-opdatering $(date -u +%Y-%m-%d_%H:%M)"
+            git pull --rebase
+            git push
+          fi
