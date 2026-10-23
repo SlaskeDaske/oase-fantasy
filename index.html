@@ -318,6 +318,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <a onclick="show('powerrankings')" id="nav-powerrankings">📈 Power Rankings</a>
     <a onclick="show('playoffodds')" id="nav-playoffodds">🎲 Playoff Odds</a>
     <a onclick="show('newsletter')" id="nav-newsletter">📰 Newsletter</a>
+    <a onclick="show('hats')" id="nav-hats">🎩 Hat</a>
     <div class="nav-lbl">Overblik</div>
     <a onclick="show('overview')" id="nav-overview">🏆 Trophy Wall</a>
     <a onclick="show('awards')" id="nav-awards">🥇 Awards</a>
@@ -365,7 +366,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
   <div class="page-sub">Hædersbevisninger — fortjente og ufortjente</div>
   <div class="awards-grid" id="awards-grid"></div>
   <div class="sec-title">🎩 Hat <span>Awards 2026</span></div>
-  <div class="page-sub">Hat = starter en Out/IR/inaktiv spiller · Turban = møder en Hat · Kyse = taber til en Hat</div>
+  <div class="page-sub">Hat = starter en Out/IR/inaktiv spiller · Turban = møder en Hat · Sombrero = taber til en Hat</div>
   <div class="awards-grid" id="awards-hat-grid"></div>
 </div>
 
@@ -565,6 +566,13 @@ tr:hover td{background:rgba(255,255,255,.02)}
   <div id="sleeper-content"><div class="info-box">Henter data fra Sleeper...</div></div>
 </div>
 
+<!-- HAT -->
+<div class="section" id="section-hats">
+  <div class="page-title">🎩 HAT</div>
+  <div class="page-sub">Hat, Turban og Sombrero — kun sæson 2026 og frem</div>
+  <div id="hat-content"><div class="info-box">Henter Hat-data...</div></div>
+</div>
+
 <!-- POWER RANKINGS -->
 <div class="section" id="section-powerrankings">
   <div class="page-title">📈 POWER RANKINGS</div>
@@ -710,24 +718,24 @@ const MANAGERS_INFO={
 };
 
 // ── NAV ──
-const NAV_ORDER = ['sleeper','powerrankings','playoffodds','newsletter','overview','awards','alltime','stathighlights','managers','playoffs','toiletbowl','standings','matchups','h2h','draft','draftgrades','trades','about'];
+const NAV_ORDER = ['sleeper','powerrankings','playoffodds','newsletter','hats','overview','awards','alltime','stathighlights','managers','playoffs','toiletbowl','standings','matchups','h2h','draft','draftgrades','trades','about'];
 const NAV_TITLES = {
   overview:'Trophy Wall', awards:'Awards', alltime:'All-Time Stats', stathighlights:'Stat Highlights', managers:'Managers',
   sleeper:'Aktuel Sæson', powerrankings:'Power Rankings', playoffodds:'Playoff Odds',
-  newsletter:'Newsletter',
+  newsletter:'Newsletter', hats:'Hat',
   playoffs:'Playoff Resultater', toiletbowl:'Toilet Bowl', standings:'Regular Season',
   matchups:'Matchups', h2h:'Head-to-Head', draft:'Draft', draftgrades:'Draft Grades',
   trades:'Trades', about:'Ligaen'
 };
 const NAV_ICONS = {
   overview:'🏆', awards:'🥇', alltime:'📈', stathighlights:'⭐', managers:'👤',
-  sleeper:'🟢', powerrankings:'📈', playoffodds:'🎲', newsletter:'📰',
+  sleeper:'🟢', powerrankings:'📈', playoffodds:'🎲', newsletter:'📰', hats:'🎩',
   playoffs:'🏟️', toiletbowl:'🚽', standings:'📊',
   matchups:'⚡', h2h:'⚔️', draft:'📋', draftgrades:'🎯',
   trades:'🔄', about:'ℹ️'
 };
 const NAV_GROUPS = [
-  {label:'💤 Live (Sleeper)', items:['sleeper','powerrankings','playoffodds','newsletter']},
+  {label:'💤 Live (Sleeper)', items:['sleeper','powerrankings','playoffodds','newsletter','hats']},
   {label:'Overblik', items:['overview','awards','alltime','stathighlights','managers']},
   {label:'📚 Historik 2018–2025', items:['playoffs','toiletbowl','standings','matchups','h2h','draft','draftgrades','trades']},
   {label:'Info', items:['about']}
@@ -764,6 +772,9 @@ function triggerLazyLoad(id){
   }
   if(id === 'newsletter'){
     renderNewsletter();
+  }
+  if(id === 'hats'){
+    renderHats();
   }
 }
 
@@ -2034,7 +2045,7 @@ function renderAbout(){
 
 // ── HAT-SYSTEM (kun sæson 2026 og frem) ──
 // Hat = mindst én starter der er Out/IR/inaktiv inden kampstart.
-// Turban = man møder en modstander der er en Hat. Kyse = man taber til en Hat.
+// Turban = man møder en modstander der er en Hat. Sombrero = man taber til en Hat.
 // Data kommer fra hats.json (genereres af GitHub Action "Hat-opdatering").
 let HATS = null;
 let HATS_LOADING = null;
@@ -2085,17 +2096,24 @@ function hatTopNames(stats, key){
   return {max, names: arr.filter(s=>s[key]===max).map(s=>s.manager)};
 }
 
-async function hatSectionHtml(season){
+async function renderHats(){
+  const el = document.getElementById('hat-content');
+  if(!el) return;
+  try{ el.innerHTML = await hatSectionHtml(); applyDismissedBoxes(); }
+  catch(e){ el.innerHTML = `<div class="info-box">Kunne ikke vise Hat-data.</div>`; }
+}
+
+async function hatSectionHtml(){
   await loadHats();
-  let html = `<div class="sec-title">🎩 Hat <span>${hatEsc(season)}</span></div>`;
+  let html = '';
   if(!HATS || !HATS.weeks || Object.keys(HATS.weeks).length===0){
     return html + `<div class="info-box">Ingen Hat-data endnu. Data opdateres automatisk tirsdag morgen (og søndag) via GitHub Actions — kør "Hat-opdatering" manuelt første gang.</div>`;
   }
   html += `<div class="info-box dismissible" id="dismiss-hat-def"><button class="dismiss-btn" onclick="dismissBox('hat-def')" aria-label="Luk">✕</button>
-    <strong>🎩 Hat</strong> = du starter en spiller der er Out/IR/inaktiv inden kampstart. <strong>🧕 Turban</strong> = du møder en modstander der er en Hat. <strong>🤡 Kyse</strong> = du taber til en Hat.
+    <strong>🎩 Hat</strong> = du starter en spiller der er Out/IR/inaktiv inden kampstart. <strong>🧕 Turban</strong> = du møder en modstander der er en Hat. <strong>🤡 Sombrero</strong> = du taber til en Hat.
     Kun afsluttede uger tæller. Kilde: nflverse (inaktiv-lister) — en spiller på bænken tæller ikke.</div>`;
   const stats = Object.values(computeHatStats()).sort((a,b)=>b.hatWeeks-a.hatWeeks || b.turban-a.turban || a.manager.localeCompare(b.manager));
-  html += `<table><thead><tr><th>Manager</th><th>Uger</th><th>🎩 Hat-uger</th><th>Hat-spillere</th><th>🧕 Turban</th><th>🤡 Kyse</th><th>Hattrick</th><th>Gns. Hat-uge / øvrige</th></tr></thead><tbody>`;
+  html += `<table><thead><tr><th>Manager</th><th>Uger</th><th>🎩 Hat-uger</th><th>Hat-spillere</th><th>🧕 Turban</th><th>🤡 Sombrero</th><th>Hattrick</th><th>Gns. Hat-uge / øvrige</th></tr></thead><tbody>`;
   stats.forEach(s=>{
     html += `<tr><td>${mgrSpan(s.manager)}</td><td style="color:var(--muted)">${s.games}</td>
       <td class="pf">${s.hatWeeks}</td><td style="color:var(--muted)">${s.hatPlayers}</td>
@@ -2132,7 +2150,7 @@ function hatProfileHtml(name){
       <div class="stat-card"><div class="lbl">🧕 Turban</div><div class="val">${s.turban}</div><div class="sub">Mødt en Hat</div></div>
       <div class="stat-card"><div class="lbl">Hattrick</div><div class="val">${s.streak}</div><div class="sub">Flest Hat-uger i træk</div></div>
       ${s.avgHat!=null&&s.avgOther!=null?`<div class="stat-card"><div class="lbl">Hat-prisen</div><div class="val" style="font-size:20px">${s.avgHat.toFixed(1)} / ${s.avgOther.toFixed(1)}</div><div class="sub">Gns. point i Hat-uger / øvrige uger</div></div>`:''}
-      <div class="stat-card"><div class="lbl">🤡 Kyse</div><div class="val" style="color:${s.kyse?'var(--red)':'var(--muted)'}">${s.kyse}</div><div class="sub">${kyseTxt||'Tabt til en Hat'}</div></div>
+      <div class="stat-card"><div class="lbl">🤡 Sombrero</div><div class="val" style="color:${s.kyse?'var(--red)':'var(--muted)'}">${s.kyse}</div><div class="sub">${kyseTxt||'Tabt til en Hat'}</div></div>
     </div>`;
 }
 
@@ -2144,7 +2162,7 @@ function renderHatAwards(){
     {key:'hatWeeks', emoji:'🎩', title:'HATTEN', unit:'Hat-uger', desc:'Flest uger med en Out/IR/inaktiv spiller i startopstillingen. Opstillingen blev aldrig tjekket.'},
     {key:'turban', emoji:'🧕', title:'TURBAN', unit:'gange', desc:'Har oftest mødt en modstander der var en Hat. Heldig — eller bare den der er blevet tildelt dem.'},
     {key:'streak', emoji:'🎩🎩🎩', title:'HATTRICK', unit:'Hat-uger i træk', desc:'Længste stime af uger i træk med en inaktiv starter. Gentagelse er ikke en undskyldning.'},
-    {key:'kyse', emoji:'🤡', title:'KYSEN', unit:'gange', desc:'Har oftest tabt til en Hat. Det gør ondt at tabe til en der starter en inaktiv spiller.'}
+    {key:'kyse', emoji:'🤡', title:'SOMBREROEN', unit:'gange', desc:'Har oftest tabt til en Hat. Det gør ondt at tabe til en der starter en inaktiv spiller.'}
   ];
   const cards = defs.map(d=>{
     let top = hatTopNames(stats, d.key);
@@ -2331,7 +2349,6 @@ async function renderSleeper() {
       }
     } catch(muErr) { /* kampe ikke tilgængelige endnu, ignorer stille */ }
 
-    try { html += await hatSectionHtml(season); } catch(hatErr) { /* Hat-data valgfri */ }
     html += `<p class="note" style="margin-top:8px">Data hentet live fra Sleeper API ved hvert besøg på denne fane.</p>`;
     el.innerHTML = html;
     applyDismissedBoxes();
@@ -2457,6 +2474,19 @@ function renderManagerProfile(name){
     </div>`;
   }
 
+  html += hatProfileHtml(name);
+
+  if(h2hRows.length){
+    html += `<div class="sec-title">Head-to-Head <span>Rekord</span></div>
+    <table><thead><tr><th>Modstander</th><th>Record</th><th>Win%</th></tr></thead><tbody>
+    ${h2hRows.map(r=>`<tr>
+      <td>${mgrSpan(r.opp)}</td>
+      <td><span style="color:var(--green)">${r.w}</span>–<span style="color:var(--red)">${r.l}</span></td>
+      <td style="color:${r.pct>0.5?'var(--green)':r.pct<0.5?'var(--red)':'var(--muted)'}">${(r.pct*100).toFixed(0)}%</td>
+    </tr>`).join('')}
+    </tbody></table>`;
+  }
+
   if(picks.length){
     html += `<div class="sec-title">Draft <span>Performance</span></div>
     <div class="stat-grid">
@@ -2474,18 +2504,6 @@ function renderManagerProfile(name){
     ${sortedTrades.map(buildTradeCard).join('')}`;
   }
 
-  if(h2hRows.length){
-    html += `<div class="sec-title">Head-to-Head <span>Rekord</span></div>
-    <table><thead><tr><th>Modstander</th><th>Record</th><th>Win%</th></tr></thead><tbody>
-    ${h2hRows.map(r=>`<tr>
-      <td>${mgrSpan(r.opp)}</td>
-      <td><span style="color:var(--green)">${r.w}</span>–<span style="color:var(--red)">${r.l}</span></td>
-      <td style="color:${r.pct>0.5?'var(--green)':r.pct<0.5?'var(--red)':'var(--muted)'}">${(r.pct*100).toFixed(0)}%</td>
-    </tr>`).join('')}
-    </tbody></table>`;
-  }
-
-  html += hatProfileHtml(name);
   CUR_MGR_PROFILE = name;
   document.getElementById('mgr-profile-content').innerHTML = html;
 }
