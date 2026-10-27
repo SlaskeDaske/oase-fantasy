@@ -1,6 +1,15 @@
 {
   "issues": [
     {
+      "generated": "2026-10-27T13:06:26.687939+00:00",
+      "season": "2026",
+      "previewWeek": 8,
+      "recapWeek": 7,
+      "preview": "Efter syvende spillerunde i Oase NFL Fantasy League tegner der sig et usædvanligt billede af toppen, hvor debutanten Christian indtager andenpladsen med ligaens højeste antal point (1019.24). Christian sikrede sig i uge 7 en marginal sejr over Kasper med blot 0,02 point, hvilket understreger den statistiske tæthed i rækken. I den kommende uge 8 retter opmærksomheden sig mod det første indbyrdes møde nogensinde mellem de to debutanter, Christian og Alexander. Alexander befinder sig aktuelt på fjerdepladsen efter en sejr over den dobbelte mester Jesper, og opgøret vil definere, hvem af de nye managere der konsoliderer sig stærkest i slutspilsfeltet.\n\nEt andet væsentligt opgør finder sted mellem Jesper og ligaens duks, Roal. Selvom Roal fører ligaen 6-1, viser den historiske data siden 2018 en markant fordel til Roal med 13 sejre mod Jespers 8. For Thomas, der ligger sidst med en statistik på 2-5, giver uge 8 en statistisk mulighed for genrejsning mod Kasper, da Thomas historisk set har vundet 6 ud af 8 opgør i denne duel. Analytisk set bærer ligaen præg af, at de etablerede mestre som Jonas og Tobias kæmper med effektiviteten, mens debutanterne har formået at omsætte høj produktion til point. Det er sjældent set, at to nye spillere har så stor indflydelse på tabellens øverste halvdel så dybt inde i sæsonen.",
+      "recap": "Efter syvende spillerunde i Oase NFL Fantasy League tegner der sig et tydeligt billede af en liga præget af stor pointmæssig spredning. Ugens mest bemærkelsesværdige resultat faldt i opgøret mellem debutanten Christian og Kasper, hvor Christian sikrede sig sejren med den marginale forskel på 0,02 point. Christian konsoliderer dermed sin andenplads i tabellen og er foreløbigt den eneste manager, der har krydset den samlede score på 1000 point. Omvendt leverede ligaens førerhold, Roal, rundens svageste indsats med blot 88,52 point i nederlaget til Simon. Selvom Roal beholder førstepladsen med en statistik på 6-1, er forspringet mindsket, og hans Points Against på 774,28 indikerer, at modstanderne hidtil har haft svært ved at ramme topniveauet mod ham.\n\nI bunden af tabellen vandt Tobias et tæt opgør mod Thomas, hvilket efterlader Thomas på sidstepladsen med ligaens laveste pointtotal på 755,92. Jesper indtager tredjepladsen trods et nederlag til Alexander, mens Jonas må konstatere, at han med 800,52 point har scoret mere end tre andre managere, men alligevel er placeret som nummer otte. Historisk set går ligaen nu ind i en interessant fase, hvor de to debutanter, Christian og Alexander, i uge 8 mødes for første gang i et direkte opgør om placeringerne i den øverste halvdel. Det må konstateres, at de nye deltagere har haft en usædvanlig effektiv indtræden i en liga, der ellers er domineret af mangeårig historik og syv tidligere mestre.",
+      "model": "gemini-3-flash-preview"
+    },
+    {
       "generated": "2026-10-20T12:39:28.565114+00:00",
       "season": "2026",
       "previewWeek": 7,
