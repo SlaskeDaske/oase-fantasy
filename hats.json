@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-25T18:32:10.555312+00:00",
+ "generated": "2026-10-27T11:25:02.197451+00:00",
  "season": "2026",
  "weeks": {
   "1": {
@@ -255,11 +255,75 @@
      "points": 0
     }
    ]
+  },
+  "7": {
+   "games": [
+    {
+     "m1": "Jesper",
+     "s1": 116.72,
+     "m2": "Alexander",
+     "s2": 128.22
+    },
+    {
+     "m1": "Lasse",
+     "s1": 131.48,
+     "m2": "Jonas",
+     "s2": 95.52
+    },
+    {
+     "m1": "Thomas",
+     "s1": 96.0,
+     "m2": "Tobias",
+     "s2": 101.42
+    },
+    {
+     "m1": "Roal",
+     "s1": 88.52,
+     "m2": "Simon",
+     "s2": 136.16
+    },
+    {
+     "m1": "Kasper",
+     "s1": 132.1,
+     "m2": "Christian",
+     "s2": 132.12
+    }
+   ],
+   "hats": []
   }
  },
  "live": {
-  "week": 7,
-  "flagged": [],
+  "week": 8,
+  "flagged": [
+   {
+    "manager": "Lasse",
+    "player": "Breece Hall",
+    "pos": "RB",
+    "nfl": "NYJ",
+    "status": "Out"
+   },
+   {
+    "manager": "Thomas",
+    "player": "Jeremiyah Love",
+    "pos": "RB",
+    "nfl": "ARI",
+    "status": "Out"
+   },
+   {
+    "manager": "Christian",
+    "player": "Zach Charbonnet",
+    "pos": "RB",
+    "nfl": "SEA",
+    "status": "Out"
+   },
+   {
+    "manager": "Christian",
+    "player": "DeVonta Smith",
+    "pos": "WR",
+    "nfl": "PHI",
+    "status": "Out"
+   }
+  ],
   "doubtful": []
  }
 }
