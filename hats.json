@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-01T13:55:36.000222+00:00",
+ "generated": "2026-11-01T19:52:55.603212+00:00",
  "season": "2026",
  "weeks": {
   "1": {
@@ -294,15 +294,7 @@
  },
  "live": {
   "week": 8,
-  "flagged": [
-   {
-    "manager": "Simon",
-    "player": "RJ Harvey",
-    "pos": "RB",
-    "nfl": "DEN",
-    "status": "RES"
-   }
-  ],
+  "flagged": [],
   "doubtful": []
  }
 }
