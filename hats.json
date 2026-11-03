@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-01T19:52:55.603212+00:00",
+ "generated": "2026-11-03T13:26:51.651704+00:00",
  "season": "2026",
  "weeks": {
   "1": {
@@ -290,11 +290,68 @@
     }
    ],
    "hats": []
+  },
+  "8": {
+   "games": [
+    {
+     "m1": "Jesper",
+     "s1": 111.66,
+     "m2": "Roal",
+     "s2": 131.08
+    },
+    {
+     "m1": "Lasse",
+     "s1": 192.68,
+     "m2": "Tobias",
+     "s2": 103.8
+    },
+    {
+     "m1": "Thomas",
+     "s1": 59.88,
+     "m2": "Kasper",
+     "s2": 153.76
+    },
+    {
+     "m1": "Simon",
+     "s1": 92.92,
+     "m2": "Jonas",
+     "s2": 97.0
+    },
+    {
+     "m1": "Christian",
+     "s1": 94.98,
+     "m2": "Alexander",
+     "s2": 137.26
+    }
+   ],
+   "hats": []
   }
  },
  "live": {
-  "week": 8,
-  "flagged": [],
+  "week": 9,
+  "flagged": [
+   {
+    "manager": "Lasse",
+    "player": "Breece Hall",
+    "pos": "RB",
+    "nfl": "NYJ",
+    "status": "Out"
+   },
+   {
+    "manager": "Thomas",
+    "player": "Jeremiyah Love",
+    "pos": "RB",
+    "nfl": "ARI",
+    "status": "Out"
+   },
+   {
+    "manager": "Thomas",
+    "player": "Hunter Henry",
+    "pos": "TE",
+    "nfl": "NE",
+    "status": "Out"
+   }
+  ],
   "doubtful": []
  }
 }
