@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-08T19:54:23.720723+00:00",
+ "generated": "2026-11-10T14:07:26.726547+00:00",
  "season": "2026",
  "weeks": {
   "1": {
@@ -325,11 +325,68 @@
     }
    ],
    "hats": []
+  },
+  "9": {
+   "games": [
+    {
+     "m1": "Jesper",
+     "s1": 111.1,
+     "m2": "Jonas",
+     "s2": 124.58
+    },
+    {
+     "m1": "Lasse",
+     "s1": 166.44,
+     "m2": "Kasper",
+     "s2": 117.76
+    },
+    {
+     "m1": "Thomas",
+     "s1": 97.38,
+     "m2": "Christian",
+     "s2": 128.96
+    },
+    {
+     "m1": "Tobias",
+     "s1": 111.0,
+     "m2": "Simon",
+     "s2": 116.98
+    },
+    {
+     "m1": "Roal",
+     "s1": 117.24,
+     "m2": "Alexander",
+     "s2": 125.34
+    }
+   ],
+   "hats": []
   }
  },
  "live": {
-  "week": 9,
-  "flagged": [],
+  "week": 10,
+  "flagged": [
+   {
+    "manager": "Thomas",
+    "player": "Jaylen Waddle",
+    "pos": "WR",
+    "nfl": "DEN",
+    "status": "Out"
+   },
+   {
+    "manager": "Roal",
+    "player": "Josh Jacobs",
+    "pos": "RB",
+    "nfl": "GB",
+    "status": "Out"
+   },
+   {
+    "manager": "Kasper",
+    "player": "Michael Wilson",
+    "pos": "WR",
+    "nfl": "ARI",
+    "status": "Out"
+   }
+  ],
   "doubtful": []
  }
 }
