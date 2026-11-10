@@ -1,6 +1,15 @@
 {
   "issues": [
     {
+      "generated": "2026-11-10T15:31:02.312151+00:00",
+      "season": "2026",
+      "previewWeek": 10,
+      "recapWeek": 9,
+      "preview": "Oase NFL Fantasy League træder ind i uge 10 med en tæt topstrid, hvor særligt debutanterne Christian og Alexander har markeret sig. Christian indtager rækkens andenplads og har ligaens højeste antal point scoret med 1243,18. Han står i denne uge over for Lasse, der med en frisk sejr på 166,44 point og en historik som tidligere mester repræsenterer en betydelig udfordring. Da det er Christians første sæson, findes der ingen historisk data for dette opgør, hvilket gør kampen til rundens mest uforudsigelige taktiske duel.\n\nEt andet markant opgør finder sted mellem Roal og Jonas. På trods af Roals nuværende førsteplads og en rekord på 7-2, viser den historiske statistik siden 2018 en total balance på 7-7 i deres indbyrdes opgør. Jonas vandt i uge 9 over Jesper og har før bevist, at han kan håndtere Roals spillestil. Samtidig skal Thomas forsøge at rette op på en svær sæson i sit første møde med debutanten Alexander, mens den dobbelte mester Jesper møder Tobias i en kamp, hvor begge har brug for point for at holde trit med midterfeltet. Den nuværende stilling indikerer, at de etablerede mestre er under pres fra de nye managers, og stabiliteten i toppen vil sandsynligvis blive dikteret af, om Christian og Alexander kan opretholde deres høje pointgennemsnit i grundspillets afsluttende fase.",
+      "recap": "Efter uge 9 i Oase NFL Fantasy League tegner der sig et tydeligt billede af en sæson, hvor de to debutanter, Christian og Alexander, har manifesteret sig i toppen af tabellen. Alexander leverede en af rundens mest markante resultater ved at besejre duksene fra Roal med 125,34 mod 117,24. På trods af nederlaget fastholder Roal førstepladsen med en statistik på 7-2, men feltet er rykket tættere sammen. Ugens statistisk stærkeste præstation stod Lasse for, da han med 166,44 point udspillede Kasper. Det er en score, der bringer Lasses samlede pointantal op på 1212,38, hvilket understreger hans kandidatur til slutspillet.\n\nI den modsatte ende af skalaen leverede Thomas ugens svageste indsats med 97,38 point i nederlaget til Christian. Thomas befinder sig nu på en delt sidsteplads med Tobias, begge med statistikken 2-7, hvilket gør deres vej til playoffs matematisk udfordret. Ugens mest marginale opgør fandt sted mellem Simon og Tobias, hvor sidstnævnte med 111,00 point må konstatere, at han nu har ligaens højeste antal point imod sig med 1237,16. Det er en statistisk anomali, der understreger Tobias’ manglende held i kampplanlægningen i år. Blandt de tidligere mestre kæmper Jesper og Jonas i midterfeltet med 4-5, hvilket efterlader ligaen usædvanligt åben før de kommende historiske opgør i uge 10.",
+      "model": "gemini-3-flash-preview"
+    },
+    {
       "generated": "2026-11-03T14:58:02.000019+00:00",
       "season": "2026",
       "previewWeek": 9,
