@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-15T14:25:52.165855+00:00",
+ "generated": "2026-11-15T20:30:26.476070+00:00",
  "season": "2026",
  "weeks": {
   "1": {
@@ -364,7 +364,29 @@
  },
  "live": {
   "week": 10,
-  "flagged": [],
+  "flagged": [
+   {
+    "manager": "Jesper",
+    "player": "Omar Cooper Jr.",
+    "pos": "WR",
+    "nfl": "NYJ",
+    "status": "Out"
+   },
+   {
+    "manager": "Kasper",
+    "player": "Drake Maye",
+    "pos": "QB",
+    "nfl": "NE",
+    "status": "Out"
+   },
+   {
+    "manager": "Kasper",
+    "player": "A.J. Brown",
+    "pos": "WR",
+    "nfl": "NE",
+    "status": "Out"
+   }
+  ],
   "doubtful": []
  }
 }
