@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-10T14:07:26.726547+00:00",
+ "generated": "2026-11-15T14:25:52.165855+00:00",
  "season": "2026",
  "weeks": {
   "1": {
@@ -364,29 +364,7 @@
  },
  "live": {
   "week": 10,
-  "flagged": [
-   {
-    "manager": "Thomas",
-    "player": "Jaylen Waddle",
-    "pos": "WR",
-    "nfl": "DEN",
-    "status": "Out"
-   },
-   {
-    "manager": "Roal",
-    "player": "Josh Jacobs",
-    "pos": "RB",
-    "nfl": "GB",
-    "status": "Out"
-   },
-   {
-    "manager": "Kasper",
-    "player": "Michael Wilson",
-    "pos": "WR",
-    "nfl": "ARI",
-    "status": "Out"
-   }
-  ],
+  "flagged": [],
   "doubtful": []
  }
 }
