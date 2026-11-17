@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-15T20:30:26.476070+00:00",
+ "generated": "2026-11-17T15:21:36.911288+00:00",
  "season": "2026",
  "weeks": {
   "1": {
@@ -360,16 +360,58 @@
     }
    ],
    "hats": []
+  },
+  "10": {
+   "games": [
+    {
+     "m1": "Jesper",
+     "s1": 152.48,
+     "m2": "Tobias",
+     "s2": 110.0
+    },
+    {
+     "m1": "Lasse",
+     "s1": 124.06,
+     "m2": "Christian",
+     "s2": 116.2
+    },
+    {
+     "m1": "Thomas",
+     "s1": 137.02,
+     "m2": "Alexander",
+     "s2": 123.14
+    },
+    {
+     "m1": "Roal",
+     "s1": 167.98,
+     "m2": "Jonas",
+     "s2": 134.46
+    },
+    {
+     "m1": "Simon",
+     "s1": 132.1,
+     "m2": "Kasper",
+     "s2": 86.92
+    }
+   ],
+   "hats": []
   }
  },
  "live": {
-  "week": 10,
+  "week": 11,
   "flagged": [
    {
     "manager": "Jesper",
-    "player": "Omar Cooper Jr.",
+    "player": "Ladd McConkey",
     "pos": "WR",
-    "nfl": "NYJ",
+    "nfl": "LAC",
+    "status": "Out"
+   },
+   {
+    "manager": "Lasse",
+    "player": "Brock Bowers",
+    "pos": "TE",
+    "nfl": "LV",
     "status": "Out"
    },
    {
