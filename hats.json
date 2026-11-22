@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-17T15:21:36.911288+00:00",
+ "generated": "2026-11-22T14:58:22.332150+00:00",
  "season": "2026",
  "weeks": {
   "1": {
@@ -400,20 +400,6 @@
  "live": {
   "week": 11,
   "flagged": [
-   {
-    "manager": "Jesper",
-    "player": "Ladd McConkey",
-    "pos": "WR",
-    "nfl": "LAC",
-    "status": "Out"
-   },
-   {
-    "manager": "Lasse",
-    "player": "Brock Bowers",
-    "pos": "TE",
-    "nfl": "LV",
-    "status": "Out"
-   },
    {
     "manager": "Kasper",
     "player": "Drake Maye",
