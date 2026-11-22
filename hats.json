@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-22T14:58:22.332150+00:00",
+ "generated": "2026-11-22T21:10:57.640532+00:00",
  "season": "2026",
  "weeks": {
   "1": {
@@ -399,22 +399,7 @@
  },
  "live": {
   "week": 11,
-  "flagged": [
-   {
-    "manager": "Kasper",
-    "player": "Drake Maye",
-    "pos": "QB",
-    "nfl": "NE",
-    "status": "Out"
-   },
-   {
-    "manager": "Kasper",
-    "player": "A.J. Brown",
-    "pos": "WR",
-    "nfl": "NE",
-    "status": "Out"
-   }
-  ],
+  "flagged": [],
   "doubtful": []
  }
 }
