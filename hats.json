@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-22T21:10:57.640532+00:00",
+ "generated": "2026-11-24T16:50:34.405099+00:00",
  "season": "2026",
  "weeks": {
   "1": {
@@ -395,11 +395,68 @@
     }
    ],
    "hats": []
+  },
+  "11": {
+   "games": [
+    {
+     "m1": "Jesper",
+     "s1": 134.58,
+     "m2": "Kasper",
+     "s2": 99.04
+    },
+    {
+     "m1": "Lasse",
+     "s1": 115.3,
+     "m2": "Thomas",
+     "s2": 100.46
+    },
+    {
+     "m1": "Tobias",
+     "s1": 168.0,
+     "m2": "Roal",
+     "s2": 89.76
+    },
+    {
+     "m1": "Simon",
+     "s1": 103.74,
+     "m2": "Christian",
+     "s2": 111.04
+    },
+    {
+     "m1": "Jonas",
+     "s1": 119.4,
+     "m2": "Alexander",
+     "s2": 117.76
+    }
+   ],
+   "hats": []
   }
  },
  "live": {
-  "week": 11,
-  "flagged": [],
+  "week": 12,
+  "flagged": [
+   {
+    "manager": "Lasse",
+    "player": "Brock Bowers",
+    "pos": "TE",
+    "nfl": "LV",
+    "status": "Out"
+   },
+   {
+    "manager": "Roal",
+    "player": "Jacory Croskey-Merritt",
+    "pos": "RB",
+    "nfl": "WAS",
+    "status": "RES"
+   },
+   {
+    "manager": "Christian",
+    "player": "Kenneth Walker III",
+    "pos": "RB",
+    "nfl": "KC",
+    "status": "Out"
+   }
+  ],
   "doubtful": []
  }
 }
